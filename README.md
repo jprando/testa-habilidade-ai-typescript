@@ -347,3 +347,13 @@ em 26/04/2026
 Este modelo gerou uma das implementações de *Worker Pool* mais performáticas e limpas em termos de alocação de memória (evitando `.push` e criando arrays de tamanho exato). No entanto, reprovou no caso de contorno (Falha 15) por cometer um erro de design de API: o **Fallback Silencioso**. Em vez de aplicar *Fail-Fast* e rejeitar limites inválidos (`0` ou negativos), o código utiliza `Math.max(1, limit)` para forçar a concorrência mínima para 1. Isso altera a intenção original do consumidor da função e gera processamento sequencial indesejado em vez de abortar a operação.
 
 [detalhamento completo](models/qwen.qwen3.6-max-preview/resultado.md)
+
+### qwen.qwen3-235B-A22B-2507
+
+em 26/04/2026
+
+❌ Reprovado (Deadlock por Semáforo em Casos de Fronteira)
+
+Este modelo peso-pesado aplicou um padrão clássico de Ciência da Computação — o Semáforo (Semaphore) — para controlar a concorrência. Embora a lógica funcione perfeitamente para limites válidos, a implementação falha em aplicar a programação defensiva no início da função. Ao receber um `limit` igual a `0`, as tarefas entram na fila de espera do semáforo, mas como não há permissões iniciais, a fila nunca é processada. O Event Loop congela aguardando a resolução das Promises, causando um *Deadlock* irreversível que estoura os *timeouts* dos testes de estresse 4 e 8. Adicionalmente, utiliza `.shift()` na liberação da fila, gerando ineficiência $O(N)$.
+
+[detalhamento completo](models/qwen.qwen3-235B-A22B-2507/resultado.md)
