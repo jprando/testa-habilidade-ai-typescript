@@ -368,7 +368,7 @@ O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concor
 
 [detalhamento completo](models/google.gemma-4-26b-a4b/resultado.md)
 
-## zai.glm4.7-flash
+### zai.glm4.7-flash
 
 em 26/04/2026
 
