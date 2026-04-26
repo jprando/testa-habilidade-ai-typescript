@@ -234,3 +234,9 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
     * *O erro*: Criar uma função recursiva com setTimeout para checar a cada X milissegundos se as tarefas terminaram (ex: if (inProgress === 0) resolve() else setTimeout()).
 
     * *Por que reprova*: É uma aberração em sistemas orientados a eventos. Desperdiça ciclos de CPU acordando o motor V8 repetidas vezes sem necessidade, adiciona latência artificial à resposta final e ignora completamente o poder de sinalização nativa do Promise.all.
+
+## Resultado da execucao do teste
+
+### com openai.gpt-oss-20b
+
+![resultado do teste com openai.gpt-oss-20b](images/openai.gpt-oss-20b.png)
