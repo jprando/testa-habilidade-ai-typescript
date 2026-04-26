@@ -281,7 +281,6 @@ Este modelo produziu o que chamamos de "código Frankenstein". Embora tente util
 ### qwen.qwen3.6-27b
 
 em 26/04/2026
-
 ✅ Aprovado (Código Sênior Impecável)
 
 Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta de *Worker Pool* (Fila Contínua), otimizou o uso de memória e gerenciou perfeitamente o *Event Loop*. O grande diferencial foi a aplicação rigorosa de *Defensive Programming*: o modelo previu a armadilha dos limites inválidos e aplicou uma cláusula de guarda lançando um `RangeError` semântico antes de qualquer alocação na memória, evitando completamente bugs de "array esburacado" que afetam outros modelos.
@@ -291,7 +290,6 @@ Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta d
 ### qwen.qwen3.6-35B-A3B
 
 em 26/04/2026
-
 ⚠️ Aprovado em Runtime (com Dívida Técnica de Tipagem)
 
 O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*), apresentando a proteção correta contra limites inválidos (*Fail-Fast*). No entanto, a solução é o que chamamos de "Código Frankenstein". Ele gerencia a fila usando `indexOf` e `splice` (o que gera varreduras $O(N)$ desnecessárias) e comete um erro de tipagem estrita ao guardar objetos `Promise` em um array do tipo `R[]`. O código só brilha no final porque o `Promise.all()` consegue desempacotar as promessas no *runtime*, mascarando a poluição de estado. É funcional, mas reprovaria em um *Code Review* de TypeScript estrito (`tsc`).
@@ -300,6 +298,7 @@ O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*),
 
 ### qwen.qwen3-coder
 
+em 26/04/2026
 ❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
 
 Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
@@ -308,8 +307,18 @@ Este modelo tentou implementar um gerenciador de concorrência baseado em um arr
 
 ### anthropic.sonnet4.6-adaptativo
 
+em 26/04/2026
 ⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
 
 O modelo entregou uma das soluções mais elegantes e enxutas do benchmark. Utilizou `Array.from` para inicializar a *Worker Pool* de forma limpa e demonstrou domínio profundo do TypeScript ao usar o Non-Null Assertion Operator (`!`) para garantir a tipagem estrita no loop. Contudo, assim como o modelo da OpenAI (GPT-OSS), ele falhou no caso de fronteira do Limite Zero (Falha 15), esquecendo a cláusula de guarda inicial e devolvendo um *Array Esburacado* em tempo de execução.
 
 [detalhamento completo](models/anthropic.sonnet4.6-adaptativo/resultado.md)
+
+### google.gemini3.1-pro
+
+em 26/04/2026
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma implementação clássica e muito limpa do padrão *Worker Pool*. Ele evita sobrecarga usando `Math.min` para calcular os workers necessários e gerencia o ponteiro atômico `currentIndex` com maestria para impedir condições de corrida. Contudo, assim como outros grandes modelos do mercado, ele esqueceu de aplicar a programação defensiva no início da função. Ao não validar se o `limit` é válido (Falha 15), ele aloca memória prematuramente e devolve um Array Esburacado se o limite requisitado for igual ou menor a zero.
+
+[detalhamento completo](models/google.gemini3.1-pro/resultado.md)

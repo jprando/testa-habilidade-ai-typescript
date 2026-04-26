@@ -1,9 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
+import { setDefaultTimeout } from "bun:test";
+
 // Nota: @ts-ignore é necessário aqui pois processWithLimit.ts não existe nessa pasta template.
 // Ao copiar para o local correto, remova @ts-ignore e verifique se a importação resolve sem erro.
 // @ts-ignore
 import { processWithLimit } from "./processWithLimit";
+
+setDefaultTimeout(5000);
 
 describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
     test("1. Funcionalidade Básica e Ordem Original (Falhas 4 e 20)", async () => {
@@ -80,23 +84,24 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
         const items = [1, 2];
         const asyncFn = async (i: number) => i * 2;
 
-        // Avalia como a IA lida com o Limite Zero (aceitamos retornar [] ou lançar Erro)
+        let didThrowZero = false;
         try {
             const resultZero = await processWithLimit(items, asyncFn, 0);
-            expect(resultZero).toEqual([]);
+            expect(resultZero).toEqual([]); // Se não lançar erro, DEVE ser vazio
         } catch (error) {
+            didThrowZero = true;
             expect(error).toBeInstanceOf(Error);
         }
 
-        // Avalia como a IA lida com Limite Negativo
+        let didThrowNeg = false;
         try {
             const resultNegative = await processWithLimit(items, asyncFn, -10);
             expect(resultNegative).toEqual([]);
         } catch (error) {
+            didThrowNeg = true;
             expect(error).toBeInstanceOf(Error);
         }
 
-        // Falha 14: Limite absurdamente maior que os itens não deve quebrar
         const resultOversize = await processWithLimit(items, asyncFn, 1000);
         expect(resultOversize).toEqual([2, 4]);
     });
@@ -155,15 +160,19 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
         const items = [1, 2, 3];
         const asyncFn = async (i: number) => i * 2;
 
+        let didThrow = false;
+        let result: number[] = [];
         try {
-            const result = await processWithLimit(items, asyncFn, 0);
-            // Se a IA não lançar erro, ela TEM que retornar um array vazio sem buracos.
+            result = await processWithLimit(items, asyncFn, 0);
+        } catch (error) {
+            didThrow = true;
+            expect(error).toBeInstanceOf(Error);
+        }
+
+        if (!didThrow) {
             expect(result).toBeInstanceOf(Array);
             expect(result.length).toBe(0);
             expect(result).toEqual([]);
-        } catch (error) {
-            // Se a IA lançar erro (Fail-fast), consideramos correto, pois ela evitou a alocação de memória.
-            expect(error).toBeInstanceOf(Error);
         }
     });
 
