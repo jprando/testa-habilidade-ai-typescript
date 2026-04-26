@@ -110,7 +110,11 @@ async function processWithLimit<T, R>(
 
 ---
 
+
+
 ### 3. O Que Avaliar nas Respostas das IAs
+
+> 💡 **Quer pular a teoria?** [Ir direto para os resultados dos modelos testados.](#resultado-da-execucao-do-teste)
 
 Ao receber a resposta das outras inteligências, observe os seguintes pontos de falha comuns:
 
