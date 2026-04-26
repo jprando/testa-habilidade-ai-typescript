@@ -75,6 +75,9 @@ async function processWithLimit<T, R>(
     asyncFn: (item: T, index: number) => Promise<R>,
     limit: number
 ): Promise<R[]> {
+    // Proteção contra limites inválidos (Falha 15)
+    if (limit <= 0) return [];
+
     // Pré-aloca o array de resultados com o tamanho correto para manter a ordem original
     const results: R[] = new Array(items.length);
 
@@ -245,7 +248,7 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
 ## Resultado da execucao do teste
 
-O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias), foi testado com a [suite de teste de referencia](processWithLimit.test.ts).
+O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias), foi testado com a [suite de teste de referencia](template/processWithLimit.test.ts).
 
 ### openai.gpt-oss-20b
 
@@ -253,9 +256,9 @@ Código gerado e testado com o modelo `openai/gpt-oss-20b` em 25/04/2026
 
 ![resultado do teste com openai.gpt-oss-20b](images/openai.gpt-oss-20b.png)
 
-### qwen.qwen3-coder-30b-a3b-instruct
+### unsloth.qwen3-coder-30b-a3b-instruct
 
-Código gerado e testado com o modelo `qwen/qwen3-coder-30b-a3b-instruct` em 25/04/2026
+Código gerado e testado com o modelo `unsloth/qwen3-coder-30b-a3b-instruct` em 25/04/2026
 
 **Status:** Reprovado (Múltiplas Falhas Críticas)
 
