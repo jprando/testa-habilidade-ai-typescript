@@ -272,7 +272,7 @@ Este modelo apresentou uma solução extremamente robusta e performática, imple
 
 em 25/04/2026
 
-🔴 Reprovado (Múltiplas Falhas Críticas)
+❌ Reprovado (Múltiplas Falhas Críticas)
 
 Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
 
@@ -286,3 +286,14 @@ em 26/04/2026
 
 Resumo da Avaliação: Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta de Worker Pool (Fila Contínua), otimizou o uso de memória e gerenciou perfeitamente o Event Loop. O grande diferencial foi a aplicação rigorosa de Defensive Programming: o modelo previu a armadilha dos limites inválidos e aplicou uma cláusula de guarda lançando um RangeError semântico antes de qualquer alocação na memória, evitando completamente bugs de "array esburacado" que afetam outros modelos.
 
+[detalhamento completo](models/qwen.qwen3.6-27b/resultado.md)
+
+### qwen.qwen3.6-35B-A3B
+
+em 26/04/2026
+
+❌ Reprovado (Erro de Compilação e Código Frankenstein)
+
+Resumo da Avaliação: Este modelo foi vítima de over-engineering. Tentando criar um gerenciamento manual complexo da fila de promessas, ele cometeu um erro grave de tipagem ao injetar objetos Promise<R> em um array tipado rigidamente como R[], o que faz o código sequer compilar. Além disso, introduziu um gargalo de performance de CPU grave (Falha 7) ao varrer e mutar o array de promessas ativas usando .indexOf() e .splice() repetidamente. É o exemplo perfeito do anti-padrão "Código Frankenstein" (Falha 12).
+
+[detalhamento completo](models/qwen.qwen3.6-35B-A3B/resultado.md)
