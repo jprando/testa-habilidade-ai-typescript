@@ -34,7 +34,7 @@ Para testar como uma nova IA se comporta, siga este fluxo:
 1. **Crie a pasta do modelo:** Crie uma pasta dentro de `models/` seguindo o padrão `empresa-ou-usuario.modelo-especificacao`.
 2. **Gere a implementação:** Envie o [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) para a IA e salve o código resultante como `processWithLimit.ts` dentro da pasta criada.
 3. **Prepare o Benchmark:** Copie somente o arquivo `template/processWithLimit.test.ts` da raiz para dentro da pasta do modelo.
-   > 💡 **Dica (Linux):** No lugar de copiar, você pode criar um link simbólico para sempre refletir a versão mais recente do template: `ln -s ../../template/processWithLimit.test.ts processWithLimit.test.ts`
+   > 💡 **Dica (Linux/Macos):** No lugar de copiar, você pode criar um link simbólico para sempre refletir a versão mais recente do template: `ln -s $CAMINHOCOMPLETOPARAOPROJETO/template/processWithLimit.test.ts processWithLimit.test.ts`
 4. **Execute o Teste:**
 
     ```bash
@@ -262,7 +262,7 @@ O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referênci
 
 em 25/04/2026
 
-🟢 Aprovado (Código Sênior com ressalva de fronteira)
+✅ Aprovado (Código Sênior com ressalva de fronteira)
 
 Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de Worker Pool (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da engine V8 ao retornar a cadeia de Promises diretamente, economizando um ciclo do Event Loop. Suas únicas penalidades foram uma escolha estilística questionável (uso de while(true) com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
 
@@ -277,3 +277,12 @@ em 25/04/2026
 Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
 
 [detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md)
+
+### qwen.qwen3.6-27b
+
+em 26/04/2026
+
+✅ Aprovado (Código Sênior Impecável)
+
+Resumo da Avaliação: Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta de Worker Pool (Fila Contínua), otimizou o uso de memória e gerenciou perfeitamente o Event Loop. O grande diferencial foi a aplicação rigorosa de Defensive Programming: o modelo previu a armadilha dos limites inválidos e aplicou uma cláusula de guarda lançando um RangeError semântico antes de qualquer alocação na memória, evitando completamente bugs de "array esburacado" que afetam outros modelos.
+

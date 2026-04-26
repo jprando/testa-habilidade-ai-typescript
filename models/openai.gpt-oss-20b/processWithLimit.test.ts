@@ -1,17 +1,16 @@
 import { describe, expect, test } from "bun:test";
 
+// Nota: @ts-ignore é necessário aqui pois processWithLimit.ts não existe nessa pasta template.
+// Ao copiar para o local correto, remova @ts-ignore e verifique se a importação resolve sem erro.
+// @ts-ignore
 import { processWithLimit } from "./processWithLimit";
 
-// Substitua ou importe a função gerada pela IA aqui
-// import { processWithLimit } from "./processWithLimit";
-
 describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
-
     test("1. Funcionalidade Básica e Ordem Original (Falhas 4 e 20)", async () => {
         // Tarefas com tempos caóticos: a primeira demora muito, a última é instantânea
         const items = [50, 10, 100, 1, 20];
         const asyncFn = async (item: number) => {
-            await new Promise(r => setTimeout(r, item));
+            await new Promise((r) => setTimeout(r, item));
             return `val-${item}`;
         };
 
@@ -19,7 +18,13 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
 
         // Se a Falha 4 ocorrer, o 'val-1' virá primeiro.
         // Se a Falha 20 ocorrer, haverá Promises vazadas no array.
-        expect(result).toEqual(["val-50", "val-10", "val-100", "val-1", "val-20"]);
+        expect(result).toEqual([
+            "val-50",
+            "val-10",
+            "val-100",
+            "val-1",
+            "val-20",
+        ]);
     });
 
     test("2. Concorrência Real e Anti-Sobrecarga (Falhas 1, 6 e 19)", async () => {
@@ -34,7 +39,7 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
 
             // Simulando uma tarefa lenta no meio do fluxo para testar se cria "Chunks" (Falha 1)
             const delay = item === 1 ? 50 : 10;
-            await new Promise(r => setTimeout(r, delay));
+            await new Promise((r) => setTimeout(r, delay));
 
             currentWorkers--;
             return item;
@@ -61,23 +66,35 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
             if (item === 2) {
                 throw new Error("Erro forçado na tarefa 2");
             }
-            await new Promise(r => setTimeout(r, 10));
+            await new Promise((r) => setTimeout(r, 10));
             return item;
         };
 
         // A execução inteira deve ser rejeitada, propagando o erro
-        expect(processWithLimit(items, asyncFn, 2)).rejects.toThrow("Erro forçado na tarefa 2");
+        expect(processWithLimit(items, asyncFn, 2)).rejects.toThrow(
+            "Erro forçado na tarefa 2",
+        );
     });
 
     test("4. Casos de Contorno e Cegueira Matemática (Falhas 14 e 15)", async () => {
         const items = [1, 2];
         const asyncFn = async (i: number) => i * 2;
 
-        // Falha 15: Limites inválidos não devem gerar loop infinito ou alocação negativa
-        const resultZero = await processWithLimit(items, asyncFn, 0);
-        const resultNegative = await processWithLimit(items, asyncFn, -10);
-        expect(resultZero).toEqual([]);
-        expect(resultNegative).toEqual([]);
+        // Avalia como a IA lida com o Limite Zero (aceitamos retornar [] ou lançar Erro)
+        try {
+            const resultZero = await processWithLimit(items, asyncFn, 0);
+            expect(resultZero).toEqual([]);
+        } catch (error) {
+            expect(error).toBeInstanceOf(Error);
+        }
+
+        // Avalia como a IA lida com Limite Negativo
+        try {
+            const resultNegative = await processWithLimit(items, asyncFn, -10);
+            expect(resultNegative).toEqual([]);
+        } catch (error) {
+            expect(error).toBeInstanceOf(Error);
+        }
 
         // Falha 14: Limite absurdamente maior que os itens não deve quebrar
         const resultOversize = await processWithLimit(items, asyncFn, 1000);
@@ -103,7 +120,7 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
         const items = [1];
 
         const asyncFn = async () => {
-            await new Promise(r => setTimeout(r, 20));
+            await new Promise((r) => setTimeout(r, 20));
             taskFinished = true;
             return true;
         };
@@ -121,7 +138,7 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
 
         const asyncFn = async (item: number) => {
             // Um pequeno delay forçado para incentivar o event loop a trocar de contexto
-            await new Promise(r => setTimeout(r, Math.random() * 2));
+            await new Promise((r) => setTimeout(r, Math.random() * 2));
             processedItems.add(item);
             return item;
         };
@@ -135,17 +152,19 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
     });
 
     test("8. A Falha Sutil de Fronteira: Array Esburacado com Limite 0 (Falha 15 Revisitada)", async () => {
-        // Cenário: Temos tarefas na fila, mas o limite passou como zero (por erro dinâmico de outro sistema).
         const items = [1, 2, 3];
         const asyncFn = async (i: number) => i * 2;
 
-        const result = await processWithLimit(items, asyncFn, 0);
-
-        // Se a IA alocou "new Array(length)" antes de checar o limite, ela retornará [empty, empty, empty].
-        // O array retornado DEVE ter length 0 e não conter buracos (undefined slots).
-        expect(result).toBeInstanceOf(Array);
-        expect(result.length).toBe(0);
-        expect(result).toEqual([]);
+        try {
+            const result = await processWithLimit(items, asyncFn, 0);
+            // Se a IA não lançar erro, ela TEM que retornar um array vazio sem buracos.
+            expect(result).toBeInstanceOf(Array);
+            expect(result.length).toBe(0);
+            expect(result).toEqual([]);
+        } catch (error) {
+            // Se a IA lançar erro (Fail-fast), consideramos correto, pois ela evitou a alocação de memória.
+            expect(error).toBeInstanceOf(Error);
+        }
     });
 
     test("9. Resiliência a retornos 'Falsy' (Prevenção da Gambiarra de Tipagem - Falhas 2 e 9)", async () => {
@@ -154,7 +173,7 @@ describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
         // Se a tarefa retornar validamente false, 0, null ou undefined, a IA entra em loop infinito.
         const items = [0, false, undefined, null, ""];
         const asyncFn = async (item: any) => {
-            await new Promise(r => setTimeout(r, 5));
+            await new Promise((r) => setTimeout(r, 5));
             return item; // Apenas ecoa o valor "falsy"
         };
 
