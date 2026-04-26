@@ -256,7 +256,7 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
 ## Resultado da execucao do teste
 
-A seguir voce encontra a analise tecnica (resumida) do código gerado pelo modelo, com apenas uma interação do [prompt de referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) e testado com a [suite de teste de referência](template/processWithLimit.test.ts).
+A seguir voce encontra a analise tecnica (resumida) do código gerado pelo modelo, com apenas uma única submissão do [prompt de referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) e testado com a [suite de teste de referência](template/processWithLimit.test.ts).
 
 ### openai.gpt-oss-20b
 
