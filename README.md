@@ -262,7 +262,7 @@ O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referênci
 
 em 25/04/2026
 
-Aprovado (Código Sênior com ressalva de fronteira)
+🟢 Aprovado (Código Sênior com ressalva de fronteira)
 
 Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de Worker Pool (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da engine V8 ao retornar a cadeia de Promises diretamente, economizando um ciclo do Event Loop. Suas únicas penalidades foram uma escolha estilística questionável (uso de while(true) com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
 
@@ -272,7 +272,7 @@ Este modelo apresentou uma solução extremamente robusta e performática, imple
 
 em 25/04/2026
 
-Reprovado (Múltiplas Falhas Críticas)
+🔴 Reprovado (Múltiplas Falhas Críticas)
 
 Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
 
