@@ -322,3 +322,11 @@ em 26/04/2026
 O modelo entregou uma implementação clássica e muito limpa do padrão *Worker Pool*. Ele evita sobrecarga usando `Math.min` para calcular os workers necessários e gerencia o ponteiro atômico `currentIndex` com maestria para impedir condições de corrida. Contudo, assim como outros grandes modelos do mercado, ele esqueceu de aplicar a programação defensiva no início da função. Ao não validar se o `limit` é válido (Falha 15), ele aloca memória prematuramente e devolve um Array Esburacado se o limite requisitado for igual ou menor a zero.
 
 [detalhamento completo](models/google.gemini3.1-pro/resultado.md)
+
+### anthropic.haiku4.5-estendido
+
+⚠️ Aprovado com Ressalvas (Alternativa O(1), falha em Edge Case)
+
+O modelo optou pela arquitetura de rastreamento de tarefas usando `Promise.race`, mas demonstrou excelente senioridade ao utilizar um `Set` em vez de um `Array` para gerenciar a fila. Isso garantiu deleções em complexidade $O(1)$ sem gargalos de varredura linear na CPU. Contudo, ele caiu na clássica Falha 15 (Cegueira Matemática). Por não incluir uma cláusula de guarda para `limit <= 0`, o código aloca memória indevidamente e transforma o processamento em uma fila 100% sequencial caso o limite seja zero, reprovando no caso de contorno.
+
+[detalhamento completo](models/anthropic.haiku4.5-estendido/resultado.md)
