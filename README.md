@@ -237,6 +237,8 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
 ## Resultado da execucao do teste
 
-### com openai.gpt-oss-20b
+### openai.gpt-oss-20b
+
+Código gerado e testado com o modelo `openai/gpt-oss-20b` em 25/04/2026
 
 ![resultado do teste com openai.gpt-oss-20b](images/openai.gpt-oss-20b.png)
