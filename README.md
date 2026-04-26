@@ -16,7 +16,7 @@ O repositório está estruturado para suportar o teste de múltiplos modelos de 
 │   │   ├── processWithLimit.ts                # Código gerado pela IA
 │   │   ├── processWithLimit.test.ts           # Cópia local da suíte de teste
 │   │   └── resultado.md                       # Relatório de análise
-│   └── unsloth.qwen3-coder-30b-a3b-instruct/  # [Usuario].[Nome-do-Modelo] (separador: ".")
+│   └── unsloth.qwen3-coder-30b-a3b-instruct/  # [Usuário].[Nome-do-Modelo] (separador: ".")
 │       ├── processWithLimit.ts                # Código gerado pela IA
 │       ├── processWithLimit.test.ts           # Cópia local da suíte de teste
 │       └── resultado.md                       # Relatório de análise
@@ -119,7 +119,7 @@ async function processWithLimit<T, R>(
 
 ### 3. O Que Avaliar nas Respostas das IAs
 
-> 💡 **Quer pular a teoria?** [Ir direto para os resultados dos modelos testados.](#resultado-da-execucao-do-teste)
+> 💡 **Quer pular a teoria?** [Ir direto para os resultados dos modelos testados.](#resultado-da-execução-do-teste)
 
 Ao receber a resposta das outras inteligências, observe os seguintes pontos de falha comuns:
 
@@ -254,9 +254,9 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
   * *Por que reprova*: É uma aberração em sistemas orientados a eventos. Desperdiça ciclos de CPU acordando o motor *V8* repetidas vezes sem necessidade, adiciona latência artificial à resposta final e ignora completamente o poder de sinalização nativa do `Promise.all`.
 
-## Resultado da execucao do teste
+## Resultado da execução do teste
 
-A seguir voce encontra a analise tecnica (resumida) do código gerado pelo modelo, com apenas uma única submissão do [prompt de referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) e testado com a [suite de teste de referência](template/processWithLimit.test.ts).
+A seguir você encontra a análise técnica (resumida) do código gerado pelo modelo, com apenas uma única submissão do [prompt de referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) e testado com a [suíte de teste de referência](template/processWithLimit.test.ts).
 
 ### openai.gpt-oss-20b
 
