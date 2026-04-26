@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-// Substitua ou importe a função gerada pela IA aqui
-// import { processWithLimit } from "./processWithLimit";
+// Nota: @ts-ignore é necessário aqui pois processWithLimit.ts não existe nessa pasta template.
+// Ao copiar para o local correto, remova @ts-ignore e verifique se a importação resolve sem erro.
+// @ts-ignore
+import { processWithLimit } from "./processWithLimit";
 
 describe("processWithLimit - Suíte de Estresse Master (23 Falhas)", () => {
 

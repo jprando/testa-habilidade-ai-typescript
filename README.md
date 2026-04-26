@@ -11,23 +11,31 @@ O repositório está estruturado para suportar o teste de múltiplos modelos de 
 ```text
 ❯ ls -la
 .
-├── openai.gpt-oss-20b/         # [Empresa].[Nome-do-Modelo]
-│   ├── processWithLimit.ts     # Código gerado pela IA
-│   └── processWithLimit.test.ts# Cópia local da suíte de teste
-├── processWithLimit.test.ts    # Template mestre da suíte de testes (23 Falhas)
-└── README.md                   # Apresentação e guia do projeto
+├── models/
+│   ├── openai.gpt-oss-20b/                        # [Empresa].[Nome-do-Modelo]
+│   │   ├── processWithLimit.ts                    # Código gerado pela IA
+│   │   └── processWithLimit.test.ts               # Cópia local da suíte de teste
+│   └── unsloth.qwen3-coder-30b-a3b-instruct/     # [Empresa].[Nome-do-Modelo]
+│       ├── processWithLimit.ts                    # Código gerado pela IA
+│       ├── processWithLimit.test.ts               # Cópia local da suíte de teste
+│       └── resultado.md                           # Relatório de análise
+├── template/
+│   └── processWithLimit.test.ts                   # Template mestre da suíte de testes (23 Falhas)
+├── images/                                         # Capturas de tela dos resultados
+├── README.md                                       # Apresentação e guia do projeto
+└── package.json                                    # Configuração do projeto
 ```
 
 ## 🚀 Como Utilizar (Onboarding para DEVs)
 
 Para testar como uma nova IA se comporta, siga este fluxo:
 
-1. **Crie a pasta do modelo:** Siga o padrão `empresa-responsavel/nome-do-modelo-especificacao`.
+1. **Crie a pasta do modelo:** Crie uma pasta dentro de `models/` seguindo o padrão `empresa-responsavel/nome-do-modelo-especificacao`.
 2. **Gere a implementação:** Envie o [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) para a IA e salve o código resultante como `processWithLimit.ts` dentro da pasta criada.
 3. **Prepare o Benchmark:** Copie somente o arquivo `template/processWithLimit.test.ts` da raiz para dentro da pasta do modelo.
 4. **Execute o Teste:**
    ```bash
-   cd nome-da-pasta-do-modelo
+   cd models/nome-da-pasta-do-modelo
    bun test
    ```
 
@@ -259,4 +267,4 @@ Este modelo produziu o que chamamos de "código Frankenstein". Embora tente util
 - **Poluição de Dados:** A lógica utilizada corrompe o retorno final, embrulhando as respostas e entregando um array bidimensional em vez dos valores reais.
 - **Cegueira Matemática (Falha 15):** Omite verificações de segurança. Se o limite passado for `0`, o código entra em um loop síncrono infinito que paralisa a CPU do servidor instantaneamente.
 
-> 🔗 *Para ver a dissecação linha por linha de como este modelo falhou, [clique aqui para ler o detalhamento completo](qwen.qwen3-coder-30b-a3b-instruct/resultado.md).*
+> 🔗 *Para ver a dissecação linha por linha de como este modelo falhou, [clique aqui para ler o detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md).*
