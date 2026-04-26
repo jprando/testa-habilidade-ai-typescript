@@ -106,7 +106,7 @@ async function processWithLimit<T, R>(
     // Math.min evita instanciar workers fantasmas quando limit > items.length — falha: 14
     const concurrency = Math.min(limit, items.length);
     // Array.from cria workers independentes: sem Promise.race, sem contador manual — falha: 8, 17, 18, 19
-    const workers = Array.from({ length: concurrency }, () => worker());
+    const workers = Array.from({ length: concurrency }, worker);
 
     // Bloqueia até todos os workers terminarem: sem retorno prematuro, sem polling — falha: 5, 22, 23
     await Promise.all(workers);
