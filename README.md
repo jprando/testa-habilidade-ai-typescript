@@ -12,19 +12,19 @@ O repositório está estruturado para suportar o teste de múltiplos modelos de 
 ❯ ls -la
 .
 ├── models/
-│   ├── openai.gpt-oss-20b/                        # [Empresa].[Nome-do-Modelo] (separador: ".")
-│   │   ├── processWithLimit.ts                    # Código gerado pela IA
-│   │   ├── processWithLimit.test.ts               # Cópia local da suíte de teste
-│   │   └── resultado.md                           # Relatório de análise
-│   └── unsloth.qwen3-coder-30b-a3b-instruct/     # [Empresa].[Nome-do-Modelo] (separador: ".")
-│       ├── processWithLimit.ts                    # Código gerado pela IA
-│       ├── processWithLimit.test.ts               # Cópia local da suíte de teste
-│       └── resultado.md                           # Relatório de análise
+│   ├── openai.gpt-oss-20b/                    # [Empresa].[Nome-do-Modelo] (separador: ".")
+│   │   ├── processWithLimit.ts                # Código gerado pela IA
+│   │   ├── processWithLimit.test.ts           # Cópia local da suíte de teste
+│   │   └── resultado.md                       # Relatório de análise
+│   └── unsloth.qwen3-coder-30b-a3b-instruct/  # [Empresa].[Nome-do-Modelo] (separador: ".")
+│       ├── processWithLimit.ts                # Código gerado pela IA
+│       ├── processWithLimit.test.ts           # Cópia local da suíte de teste
+│       └── resultado.md                       # Relatório de análise
 ├── template/
-│   └── processWithLimit.test.ts                   # Template mestre da suíte de testes (23 Falhas)
-├── images/                                         # Capturas de tela dos resultados
-├── README.md                                       # Apresentação e guia do projeto
-└── package.json                                    # Configuração do projeto
+│   └── processWithLimit.test.ts               # Template mestre da suíte de testes (23 Falhas)
+├── images/                                    # Capturas de tela dos resultados
+├── README.md                                  # Apresentação e guia do projeto
+└── package.json                               # Configuração do projeto
 ```
 
 ## 🚀 Como Utilizar (Onboarding para DEVs)
