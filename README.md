@@ -14,7 +14,8 @@ O repositório está estruturado para suportar o teste de múltiplos modelos de 
 ├── models/
 │   ├── openai.gpt-oss-20b/                        # [Empresa].[Nome-do-Modelo] (separador: ".")
 │   │   ├── processWithLimit.ts                    # Código gerado pela IA
-│   │   └── processWithLimit.test.ts               # Cópia local da suíte de teste
+│   │   ├── processWithLimit.test.ts               # Cópia local da suíte de teste
+│   │   └── resultado.md                           # Relatório de análise
 │   └── unsloth.qwen3-coder-30b-a3b-instruct/     # [Empresa].[Nome-do-Modelo] (separador: ".")
 │       ├── processWithLimit.ts                    # Código gerado pela IA
 │       ├── processWithLimit.test.ts               # Cópia local da suíte de teste
