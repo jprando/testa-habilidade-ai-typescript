@@ -24,7 +24,7 @@ Para testar como uma nova IA se comporta, siga este fluxo:
 
 1. **Crie a pasta do modelo:** Siga o padrão `empresa-responsavel/nome-do-modelo-especificacao`.
 2. **Gere a implementação:** Envie o [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) para a IA e salve o código resultante como `processWithLimit.ts` dentro da pasta criada.
-3. **Prepare o Benchmark:** Copie o arquivo `processWithLimit.test.ts` da raiz para dentro da pasta do modelo.
+3. **Prepare o Benchmark:** Copie somente o arquivo `template/processWithLimit.test.ts` da raiz para dentro da pasta do modelo.
 4. **Execute o Teste:**
    ```bash
    cd nome-da-pasta-do-modelo

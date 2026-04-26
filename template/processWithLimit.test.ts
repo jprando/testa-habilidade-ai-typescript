@@ -1,7 +1,5 @@
 import { describe, expect, test } from "bun:test";
 
-import { processWithLimit } from "./processWithLimit.openai.gpt-oss-20b.ts";
-
 // Substitua ou importe a função gerada pela IA aqui
 // import { processWithLimit } from "./processWithLimit";
 
