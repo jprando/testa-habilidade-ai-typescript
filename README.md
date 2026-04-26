@@ -48,21 +48,23 @@ Para testar como uma nova IA se comporta, siga este fluxo:
 
 Copie o bloco abaixo e envie para a IA que você deseja testar:
 
-> **Atue como um Engenheiro de Software Sênior especialista em TypeScript (e na engine do JavaScript (V8)).**
->
-> Escreva uma função chamada `processWithLimit` que executa tarefas assíncronas com um limite máximo de concorrência.
->
-> **Requisitos da Assinatura:**
-> - A função deve receber três parâmetros: um array de itens do tipo `T`, uma função iteradora assíncrona `asyncFn` (que recebe um item e seu índice, retornando uma `Promise<R>`), e um número inteiro `limit`.
-> - A função deve retornar uma `Promise<R[]>` contendo todos os resultados na exata mesma ordem do array de itens original.
->
-> **Regras de Implementação (Obrigatórias):**
-> 1. **Tipagem Estrita:** Utilize Generics (`T` e `R`) para inferir corretamente os tipos de entrada e saída. Nenhuma tipagem `any` ou `unknown` é permitida como bypass.
-> 2. **Sem Recursão:** É estritamente proibido utilizar qualquer tipo de recursão na sua lógica. Resolva o problema de forma iterativa.
-> 3. **Eficiência:** O código deve ser altamente performático. Evite mutações no array original (como `shift` ou `splice`) e garanta que os "workers" não fiquem ociosos se houver tarefas pendentes.
-> 4. **Elegância:** Utilize os recursos modernos do JavaScript/TypeScript (como `async/await`, desestruturação, etc.).
->
-> Apresente apenas a função implementada e uma breve explicação das suas escolhas arquiteturais.
+```text
+Atue como um Engenheiro de Software Sênior especialista em TypeScript (e na engine do JavaScript (V8)).
+
+Escreva uma função chamada `processWithLimit` que executa tarefas assíncronas com um limite máximo de concorrência.
+
+**Requisitos da Assinatura:**
+- A função deve receber três parâmetros: um array de itens do tipo `T`, uma função iteradora assíncrona `asyncFn` (que recebe um item e seu índice, retornando uma `Promise<R>`), e um número inteiro `limit`.
+- A função deve retornar uma `Promise<R[]>` contendo todos os resultados na exata mesma ordem do array de itens original.
+
+**Regras de Implementação (Obrigatórias):**
+1. **Tipagem Estrita:** Utilize Generics (`T` e `R`) para inferir corretamente os tipos de entrada e saída. Nenhuma tipagem `any` ou `unknown` é permitida como bypass.
+2. **Sem Recursão:** É estritamente proibido utilizar qualquer tipo de recursão na sua lógica. Resolva o problema de forma iterativa.
+3. **Eficiência:** O código deve ser altamente performático. Evite mutações no array original (como `shift` ou `splice`) e garanta que os "workers" não fiquem ociosos se houver tarefas pendentes.
+4. **Elegância:** Utilize os recursos modernos do JavaScript/TypeScript (como `async/await`, desestruturação, etc.).
+
+Apresente apenas a função implementada e uma breve explicação das suas escolhas arquiteturais.
+```
 
 ---
 
