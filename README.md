@@ -259,7 +259,13 @@ O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referênci
 
 ### openai.gpt-oss-20b
 
-Código gerado e testado com o modelo `openai/gpt-oss-20b` em 25/04/2026
+em 25/04/2026
+
+Aprovado (Código Sênior com ressalva de fronteira)
+
+Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de Worker Pool (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da engine V8 ao retornar a cadeia de Promises diretamente, economizando um ciclo do Event Loop. Suas únicas penalidades foram uma escolha estilística questionável (uso de while(true) com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
+
+[detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
 
 ### unsloth.qwen3-coder-30b-a3b-instruct
 
@@ -269,4 +275,4 @@ Reprovado (Múltiplas Falhas Críticas)
 
 Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
 
-[clique aqui para ler o detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md)
+[detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md)
