@@ -367,3 +367,13 @@ em 26/04/2026
 O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concorrência de forma nativa e sem gargalos de CPU (passando facilmente nos testes de carga). No entanto, pecou em dois pontos técnicos sutis: primeiro, falhou no tratamento da fronteira matemática (Falha 15), esquecendo a cláusula de guarda para limites iguais a zero e alocando um "array esburacado". Segundo, introduziu uma checagem condicional inútil (*Dead Code*) baseada na alucinação de que o incremento síncrono do JavaScript poderia sofrer condição de corrida antes do `await`.
 
 [detalhamento completo](models/google.gemma-4-26b-a4b/resultado.md)
+
+## zai.glm4.7-flash
+
+em 26/04/2026
+
+❌ Reprovado (Unhandled Promise Rejection)
+
+O modelo construiu uma arquitetura híbrida de rastreamento com `Set` e `Promise.race`, acertando em cheio na Cláusula de Guarda (passando nos testes de fronteira matemática). No entanto, cometeu um erro primário de *Error Handling* no Node/Bun. Ao anexar um bloco `.then()` sem o respectivo `.catch()` às promessas ativas (*Detached Promises*), qualquer falha em uma sub-tarefa gera um *Unhandled Promise* Rejection. Isso quebra a capacidade da função de rejeitar graciosamente (*Fail-Fast*) e pode causar a queda (*crash*) do processo inteiro do servidor no runtime.
+
+[detalhamento completo](models/zai.glm4.7-flash/resultado.md)
