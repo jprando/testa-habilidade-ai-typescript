@@ -244,3 +244,19 @@ O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referênci
 Código gerado e testado com o modelo `openai/gpt-oss-20b` em 25/04/2026
 
 ![resultado do teste com openai.gpt-oss-20b](images/openai.gpt-oss-20b.png)
+
+### qwen.qwen3-coder-30b-a3b-instruct
+
+Código gerado e testado com o modelo `qwen/qwen3-coder-30b-a3b-instruct` em 25/04/2026
+
+**Status:** Reprovado (Múltiplas Falhas Críticas)
+
+**Resumo da Avaliação:**
+Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
+
+- **Arquitetura de Lotes (Chunks - Falha 1):** Caiu na armadilha clássica de separar os itens em blocos rígidos, destruindo a eficiência da fila contínua e forçando *workers* a ficarem ociosos.
+- **Erro de Compilação (Falha 9):** Cometeu um erro grosseiro de tipagem ao manipular matrizes de promessas (`Promise<R>[][]`), gerando um código que sequer compila em modo estrito.
+- **Poluição de Dados:** A lógica utilizada corrompe o retorno final, embrulhando as respostas e entregando um array bidimensional em vez dos valores reais.
+- **Cegueira Matemática (Falha 15):** Omite verificações de segurança. Se o limite passado for `0`, o código entra em um loop síncrono infinito que paralisa a CPU do servidor instantaneamente.
+
+> 🔗 *Para ver a dissecação linha por linha de como este modelo falhou, [clique aqui para ler o detalhamento completo](qwen.qwen3-coder-30b-a3b-instruct/resultado.md).*
