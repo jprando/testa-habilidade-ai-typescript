@@ -6,7 +6,7 @@
 * @param limit   Máximo de workers ativos simultaneamente.
 * @returns       Uma Promise contendo os resultados na mesma ordem dos itens originais.
 *
-* codigo gerado com openai/gpt-oss-20b
+* codigo gerado com openai/gpt-oss-20b em 25/04/2026
 */
 export function processWithLimit<T, R>(
     items: T[],
