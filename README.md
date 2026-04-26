@@ -237,6 +237,8 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
 ## Resultado da execucao do teste
 
+O código gerado pelo modelo, com apenas uma iteração do [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias), foi testado com a [suite de teste de referencia](processWithLimit.test.ts).
+
 ### openai.gpt-oss-20b
 
 Código gerado e testado com o modelo `openai/gpt-oss-20b` em 25/04/2026
