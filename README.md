@@ -357,3 +357,13 @@ em 26/04/2026
 Este modelo peso-pesado aplicou um padrão clássico de Ciência da Computação — o Semáforo (Semaphore) — para controlar a concorrência. Embora a lógica funcione perfeitamente para limites válidos, a implementação falha em aplicar a programação defensiva no início da função. Ao receber um `limit` igual a `0`, as tarefas entram na fila de espera do semáforo, mas como não há permissões iniciais, a fila nunca é processada. O Event Loop congela aguardando a resolução das Promises, causando um *Deadlock* irreversível que estoura os *timeouts* dos testes de estresse 4 e 8. Adicionalmente, utiliza `.shift()` na liberação da fila, gerando ineficiência $O(N)$.
 
 [detalhamento completo](models/qwen.qwen3-235B-A22B-2507/resultado.md)
+
+### google.gemma-4-26b-a4b
+
+em 26/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concorrência de forma nativa e sem gargalos de CPU (passando facilmente nos testes de carga). No entanto, pecou em dois pontos técnicos sutis: primeiro, falhou no tratamento da fronteira matemática (Falha 15), esquecendo a cláusula de guarda para limites iguais a zero e alocando um "array esburacado". Segundo, introduziu uma checagem condicional inútil (*Dead Code*) baseada na alucinação de que o incremento síncrono do JavaScript poderia sofrer condição de corrida antes do `await`.
+
+[detalhamento completo](models/google.gemma-4-26b-a4b/resultado.md)
