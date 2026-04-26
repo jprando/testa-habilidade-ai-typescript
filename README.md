@@ -59,7 +59,7 @@ Copie o bloco abaixo e envie para a IA que você deseja testar:
 
 ### 2. A Resposta Correta (Gabarito)
 
-Aqui está a implementação ideal, focada em máxima eficiência, tipagem perfeita e zero recursão. Use este código para comparar com o que as IAs gerarem.
+Aqui está a implementação ideal utilizando a abordagem de Worker Pool (Fila Contínua), focada em máxima eficiência, tipagem perfeita e zero recursão. Use este código para comparar com o que as IAs gerarem.
 
 ```typescript
 async function processWithLimit<T, R>(
