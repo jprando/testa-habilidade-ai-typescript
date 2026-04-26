@@ -2,50 +2,53 @@
 
 | Critério | Status |
 | :--- | :--- |
-| **Resultado Final** | ❌ Reprovado |
-| **Nível de Senioridade** | Pleno / Teórico (Com falhas práticas) |
-| **Arquitetura** | Frankenstein (Tracking Manual / Promise.race) |
+| **Resultado Final** | ⚠️ Aprovado com Ressalvas (Runtime OK, TS Falho) |
+| **Nível de Senioridade** | Pleno |
+| **Arquitetura** | Tracking Manual de Promises |
 
 ## 1. Resumo da Avaliação
 
-O modelo **Qwen3.6-35B-A3B** tentou inovar substituindo a simplicidade funcional do *Worker Pool* por um gerenciador manual de concorrência com rastreamento baseado em arrays ativos e `.splice()`. O resultado é um código que falha na compilação do TypeScript devido à poluição de estado e introduz complexidade computacional $O(N)$ desnecessária.
+O modelo **Qwen3.6-35B-A3B** passou com sucesso em todos os 10 testes de estresse (0 falhas em concorrência, ordem ou *deadlocks*). Ele possui uma lógica funcional forte, mas escolheu uma arquitetura *over-engineered* que quebra as regras estáticas do compilador TypeScript, sendo salvo apenas pela execução permissiva do Bun/Node.
 
-## 2. Análise de Falhas Críticas
+## 2. Pontos Fortes
 
-### Falha 9 e 20: Poluição de Estado e Quebra de Tipos
+### Cláusula de Guarda Perfeita (Fail-Fast)
+
+O modelo implementou corretamente a proteção inicial contra cálculos dinâmicos de limite inválidos:
+
+```typescript
+if (limit <= 0) throw new RangeError("...");
+```
+
+Isso evita bugs severos de memória e vazamento de alocação (Array Esburacado).
+
+### Funcionalidade no V8
+
+Apesar de usar rastreamento manual complexo (misturando loops `while` com array `runningPromises` e `Promise.race`), a lógica matemática interna do modelo estava perfeitamente amarrada. Nenhum worker ficou perdido e a ordem original foi preservada impecavelmente através do `Promise.all()` final.
+
+## 3. Análise de Falhas Técnicas (Por que reprovaria no CI/CD)
+
+### Erro de Análise Estática (TypeScript)
 
 ```typescript
 const results: R[] = new Array(...);
 const task = asyncFn(...);
-results[idx] = task; // ERRO FATAL
-// Type 'Promise<R>' is not assignable to type 'R'.
-// 'R' could be instantiated with an arbitrary type which could be unrelated to 'Promise<R>'. ts(2322)
+results[idx] = task; // Injeção de Promise em array de valores
 ```
 
-O modelo tenta armazenar uma `Promise<R>` dentro de um array declarado explicitamente como R[]. O TypeScript acusa erro imediato de compatibilidade de tipos. O modelo delegou erroneamente o desempacotamento das Promises para a linha final (return Promise.all(results)), destruindo a segurança de tipos no processo.
+Embora o Bun ignore isso em tempo de execução, o comando `tsc --noEmit` de um pipeline corporativo falharia imediatamente ao perceber que uma `Promise<R>` está sendo inserida em um slot do tipo `R`.
 
-### Falha 7: Ineficiência no Tracking de Workers (Gargalo de CPU)
+### Escolha Algorítmica Ineficiente
+
+Para gerenciar os slots livres, o modelo optou por:
 
 ```typescript
 const pos = runningPromises.indexOf(task);
 if (pos !== -1) runningPromises.splice(pos, 1);
 ```
 
-O modelo alucinou na arquitetura de software ao afirmar em comentário que essa operação seria "O(1) amortizado". No motor V8, as operações `.indexOf()` e `.splice()` em arrays densos causam varreduras lineares e reindexação de blocos de memória, resultando em complexidade $O(N)$. Isso é um anti-padrão severo para loops de alta cadência.
-
-### Falha 12: O Código Frankenstein
-
-A mistura de um `while` externo, um `while` interno que manipula contadores (`activeCount`), remoção assíncrona mutável via `.finally()` e contenção com `await Promise.race()` cria um fluxo de difícil leitura e extrema fragilidade de estado (*State Desync*).
-
-## 3. Pontos Positivos
-
-- O modelo manteve de forma excelente a Cláusula de Guarda (Fail-Fast) para proteger contra limit <= 0 (Falha 15 resolvida).
-- Garantiu a alocação de memória sem mutar o array original.
+Embora arrays pequenos (como o limite de 50 no Teste 10) sejam processados instantaneamente pelo motor V8, usar métodos de varredura linear e realocação de índices em um loop de alta concorrência é um anti-padrão de performance. O uso de um ponteiro atômico seria muito mais elegante e exigiria menos memória.
 
 ## 4. Veredito de Engenharia
 
-Embora tenha conceitos de segurança de borda, o over-engineering destruiu a aplicação.
-
-Comparado com a versão menor e mais focada (Qwen3.6-27B), este modelo de 35B parâmetros priorizou uma estética de "código complexo" em detrimento da funcionalidade e obediência ao compilador.
-
-Não recomendado para produção.
+É um código que "funciona na máquina", mas carrega dívidas técnicas arquiteturais. Demonstra que modelos maiores (35B) podem, ironicamente, "pensar demais" e tentar inventar soluções complexas para problemas que os modelos mais refinados (como o Qwen3.6-27B) resolvem com arquiteturas simples e elegantes.

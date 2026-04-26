@@ -292,8 +292,8 @@ Resumo da Avaliação: Este modelo gerou a implementação ideal. Ele construiu 
 
 em 26/04/2026
 
-❌ Reprovado (Erro de Compilação e Código Frankenstein)
+⚠️ Aprovado em Runtime (com Dívida Técnica de Tipagem)
 
-Resumo da Avaliação: Este modelo foi vítima de over-engineering. Tentando criar um gerenciamento manual complexo da fila de promessas, ele cometeu um erro grave de tipagem ao injetar objetos Promise<R> em um array tipado rigidamente como R[], o que faz o código sequer compilar. Além disso, introduziu um gargalo de performance de CPU grave (Falha 7) ao varrer e mutar o array de promessas ativas usando .indexOf() e .splice() repetidamente. É o exemplo perfeito do anti-padrão "Código Frankenstein" (Falha 12).
+Resumo da Avaliação: O modelo passou em 100% dos testes lógicos e de estresse no motor V8 (Bun), apresentando a proteção correta contra limites inválidos (Fail-Fast). No entanto, a solução é o que chamamos de "Código Frankenstein". Ele gerencia a fila usando indexOf e splice (o que gera varreduras $O(N)$ desnecessárias) e comete um erro de tipagem estrita ao guardar objetos Promise em um array do tipo R[]. O código só brilha no final porque o Promise.all() consegue desempacotar as promessas no runtime, mascarando a poluição de estado. É funcional, mas reprovaria em um Code Review de TypeScript estrito (tsc).
 
 [detalhamento completo](models/qwen.qwen3.6-35B-A3B/resultado.md)
