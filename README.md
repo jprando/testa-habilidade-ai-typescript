@@ -305,3 +305,11 @@ O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*),
 Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
 
 [detalhamento completo](models/qwen.qwen3-coder/resultado.md)
+
+### anthropic.sonnet4.6-adaptativo
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma das soluções mais elegantes e enxutas do benchmark. Utilizou `Array.from` para inicializar a *Worker Pool* de forma limpa e demonstrou domínio profundo do TypeScript ao usar o Non-Null Assertion Operator (`!`) para garantir a tipagem estrita no loop. Contudo, assim como o modelo da OpenAI (GPT-OSS), ele falhou no caso de fronteira do Limite Zero (Falha 15), esquecendo a cláusula de guarda inicial e devolvendo um *Array Esburacado* em tempo de execução.
+
+[detalhamento completo](models/anthropic.sonnet4.6-adaptativo/resultado.md)
