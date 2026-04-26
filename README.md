@@ -297,3 +297,11 @@ em 26/04/2026
 O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*), apresentando a proteção correta contra limites inválidos (*Fail-Fast*). No entanto, a solução é o que chamamos de "Código Frankenstein". Ele gerencia a fila usando `indexOf` e `splice` (o que gera varreduras $O(N)$ desnecessárias) e comete um erro de tipagem estrita ao guardar objetos `Promise` em um array do tipo `R[]`. O código só brilha no final porque o `Promise.all()` consegue desempacotar as promessas no *runtime*, mascarando a poluição de estado. É funcional, mas reprovaria em um *Code Review* de TypeScript estrito (`tsc`).
 
 [detalhamento completo](models/qwen.qwen3.6-35B-A3B/resultado.md)
+
+### qwen.qwen3-coder
+
+❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
+
+Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
+
+[detalhamento completo](models/qwen.qwen3-coder/resultado.md)
