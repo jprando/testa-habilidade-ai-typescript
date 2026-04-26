@@ -330,3 +330,11 @@ O modelo entregou uma implementação clássica e muito limpa do padrão *Worker
 O modelo optou pela arquitetura de rastreamento de tarefas usando `Promise.race`, mas demonstrou excelente senioridade ao utilizar um `Set` em vez de um `Array` para gerenciar a fila. Isso garantiu deleções em complexidade $O(1)$ sem gargalos de varredura linear na CPU. Contudo, ele caiu na clássica Falha 15 (Cegueira Matemática). Por não incluir uma cláusula de guarda para `limit <= 0`, o código aloca memória indevidamente e transforma o processamento em uma fila 100% sequencial caso o limite seja zero, reprovando no caso de contorno.
 
 [detalhamento completo](models/anthropic.haiku4.5-estendido/resultado.md)
+
+### qwen.qwen3.6-max-preview
+
+⚠️ Aprovado com Ressalvas (Código Sênior, Falha por Fallback Silencioso)
+
+Este modelo gerou uma das implementações de *Worker Pool* mais performáticas e limpas em termos de alocação de memória (evitando `.push` e criando arrays de tamanho exato). No entanto, reprovou no caso de contorno (Falha 15) por cometer um erro de design de API: o **Fallback Silencioso**. Em vez de aplicar *Fail-Fast* e rejeitar limites inválidos (`0` ou negativos), o código utiliza `Math.max(1, limit)` para forçar a concorrência mínima para 1. Isso altera a intenção original do consumidor da função e gera processamento sequencial indesejado em vez de abortar a operação.
+
+[detalhamento completo](models/qwen.qwen3.6-max-preview/resultado.md)
