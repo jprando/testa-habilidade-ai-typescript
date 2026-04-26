@@ -12,10 +12,10 @@ O repositório está estruturado para suportar o teste de múltiplos modelos de 
 ❯ ls -la
 .
 ├── models/
-│   ├── openai.gpt-oss-20b/                        # [Empresa].[Nome-do-Modelo]
+│   ├── openai.gpt-oss-20b/                        # [Empresa].[Nome-do-Modelo] (separador: ".")
 │   │   ├── processWithLimit.ts                    # Código gerado pela IA
 │   │   └── processWithLimit.test.ts               # Cópia local da suíte de teste
-│   └── unsloth.qwen3-coder-30b-a3b-instruct/     # [Empresa].[Nome-do-Modelo]
+│   └── unsloth.qwen3-coder-30b-a3b-instruct/     # [Empresa].[Nome-do-Modelo] (separador: ".")
 │       ├── processWithLimit.ts                    # Código gerado pela IA
 │       ├── processWithLimit.test.ts               # Cópia local da suíte de teste
 │       └── resultado.md                           # Relatório de análise
@@ -30,9 +30,10 @@ O repositório está estruturado para suportar o teste de múltiplos modelos de 
 
 Para testar como uma nova IA se comporta, siga este fluxo:
 
-1. **Crie a pasta do modelo:** Crie uma pasta dentro de `models/` seguindo o padrão `empresa-responsavel/nome-do-modelo-especificacao`.
+1. **Crie a pasta do modelo:** Crie uma pasta dentro de `models/` seguindo o padrão `empresa-ou-usuario.modelo-especificacao`.
 2. **Gere a implementação:** Envie o [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) para a IA e salve o código resultante como `processWithLimit.ts` dentro da pasta criada.
 3. **Prepare o Benchmark:** Copie somente o arquivo `template/processWithLimit.test.ts` da raiz para dentro da pasta do modelo.
+   > 💡 **Dica (Linux):** No lugar de copiar, você pode criar um link simbólico para sempre refletir a versão mais recente do template: `ln -s ../../template/processWithLimit.test.ts processWithLimit.test.ts`
 4. **Execute o Teste:**
    ```bash
    cd models/nome-da-pasta-do-modelo
