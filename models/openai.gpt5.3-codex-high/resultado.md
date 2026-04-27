@@ -52,7 +52,7 @@ while (true) {
 
 * **Refatoração Sugerida**: Para um código de nível "*Architect*", a condição de saída deve estar no cabeçalho: `while (nextIndex < total) { ... }`.
 
-O uso de loops infinitos com interrupção interna (`break`) aumenta a carga cognitiva de leitura. A prática sênior e declarativa exige que a condição de parada esteja na assinatura do laço. Para atingir a perfeição absoluta de estilo, o bloco deveria ser reescrito como:
+Para atingir a perfeição absoluta de estilo, o bloco deveria ser reescrito como:
 
 ```typescript
 while (nextIndex < total) {
