@@ -55,6 +55,8 @@ Copie o bloco abaixo e envie para a IA que você deseja testar:
 ```text
 Atue como um Engenheiro de Software Sênior especialista em TypeScript (e na engine do JavaScript (V8)).
 
+Utilize somente as informações do seu próprio modelo.
+
 Escreva uma função chamada `processWithLimit` que executa tarefas assíncronas com um limite máximo de concorrência.
 
 **Requisitos da Assinatura:**
@@ -377,3 +379,10 @@ em 26/04/2026
 O modelo construiu uma arquitetura híbrida de rastreamento com `Set` e `Promise.race`, acertando em cheio na Cláusula de Guarda (passando nos testes de fronteira matemática). No entanto, cometeu um erro primário de *Error Handling* no Node/Bun. Ao anexar um bloco `.then()` sem o respectivo `.catch()` às promessas ativas (*Detached Promises*), qualquer falha em uma sub-tarefa gera um *Unhandled Promise* Rejection. Isso quebra a capacidade da função de rejeitar graciosamente (*Fail-Fast*) e pode causar a queda (*crash*) do processo inteiro do servidor no runtime.
 
 [detalhamento completo](models/zai.glm4.7-flash/resultado.md)
+
+### openai.gpt5.3-codex-high
+
+em 27/04/2026
+
+
+[detalhamento completo](models/openai.gpt5.3-codex-high/resultado.md)
