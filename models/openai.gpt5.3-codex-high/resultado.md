@@ -2,8 +2,8 @@
 
 | Critério | Status |
 | :--- | :--- |
-| **Resultado Final** | 🏆 Aprovado com Louvor |
-| **Nível de Senioridade** | Sênior (Architect) |
+| **Resultado Final** | ⚠️ Aprovado (Dívida de Estilo) |
+| **Nível de Senioridade** | Sênior |
 | **Arquitetura** | Worker Pool (Fila Contínua Pura) |
 
 ## 1. Resumo da Avaliação
