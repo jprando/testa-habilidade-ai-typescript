@@ -260,27 +260,19 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
 A seguir você encontra a análise técnica (resumida) do código gerado pelo modelo, com apenas uma única submissão do [prompt de referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) e testado com a [suíte de teste de referência](template/processWithLimit.test.ts).
 
-### openai.gpt-oss-20b
+### Códigos Vencedores
 
-em 25/04/2026
+#### #1 openai.gpt5.3-codex-high
 
-✅ Aprovado (Código Sênior com ressalva de fronteira)
+em 27/04/2026
 
-Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de *Worker Pool* (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da *engine* *V8* ao retornar a cadeia de *Promises* diretamente, economizando um ciclo do *Event Loop*. Suas únicas penalidades foram uma escolha estilística questionável (uso de `while(true)` com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
+🏆 Aprovado com Louvor (Gabarito Definitivo)
 
-[detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
+Este modelo gerou a implementação perfeita. Ele combina a arquitetura de Worker Pool contínua com as melhores práticas de Clean Code e Defensive Programming. É o único modelo que modificou a assinatura para receber readonly T[], garantindo imutabilidade de dados em tempo de compilação. Trata os limites inválidos com RangeError estrito, instancia os workers de forma elegante com Array.from e passa em absolutamente todos os testes de estresse de concorrência e memória do motor V8 com tempos de execução mínimos.
 
-### unsloth.qwen3-coder-30b-a3b-instruct
+[detalhamento completo](models/openai.gpt5.3-codex-high/resultado.md)
 
-em 25/04/2026
-
-❌ Reprovado (Múltiplas Falhas Críticas)
-
-Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
-
-[detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md)
-
-### qwen.qwen3.6-27b
+#### #2 qwen.qwen3.6-27b
 
 em 26/04/2026
 
@@ -290,27 +282,19 @@ Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta d
 
 [detalhamento completo](models/qwen.qwen3.6-27b/resultado.md)
 
-### qwen.qwen3.6-35B-A3B
+### Passaram nos Testes (com Ressalvas)
 
-em 26/04/2026
+#### #1 openai.gpt-oss-20b
 
-⚠️ Aprovado em Runtime (com Dívida Técnica de Tipagem)
+em 25/04/2026
 
-O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*), apresentando a proteção correta contra limites inválidos (*Fail-Fast*). No entanto, a solução é o que chamamos de "Código Frankenstein". Ele gerencia a fila usando `indexOf` e `splice` (o que gera varreduras $O(N)$ desnecessárias) e comete um erro de tipagem estrita ao guardar objetos `Promise` em um array do tipo `R[]`. O código só brilha no final porque o `Promise.all()` consegue desempacotar as promessas no *runtime*, mascarando a poluição de estado. É funcional, mas reprovaria em um *Code Review* de TypeScript estrito (`tsc`).
+✅ Aprovado (Código Sênior com ressalva de fronteira)
 
-[detalhamento completo](models/qwen.qwen3.6-35B-A3B/resultado.md)
+Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de *Worker Pool* (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da *engine* *V8* ao retornar a cadeia de *Promises* diretamente, economizando um ciclo do *Event Loop*. Suas únicas penalidades foram uma escolha estilística questionável (uso de `while(true)` com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
 
-### qwen.qwen3-coder
+[detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
 
-em 26/04/2026
-
-❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
-
-Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
-
-[detalhamento completo](models/qwen.qwen3-coder/resultado.md)
-
-### anthropic.sonnet4.6-adaptativo
+#### #2 anthropic.sonnet4.6-adaptativo
 
 em 26/04/2026
 
@@ -320,7 +304,7 @@ O modelo entregou uma das soluções mais elegantes e enxutas do benchmark. Util
 
 [detalhamento completo](models/anthropic.sonnet4.6-adaptativo/resultado.md)
 
-### google.gemini3.1-pro
+#### #3 google.gemini3.1-pro
 
 em 26/04/2026
 
@@ -330,7 +314,7 @@ O modelo entregou uma implementação clássica e muito limpa do padrão *Worker
 
 [detalhamento completo](models/google.gemini3.1-pro/resultado.md)
 
-### anthropic.haiku4.5-estendido
+#### #4 anthropic.haiku4.5-estendido
 
 em 26/04/2026
 
@@ -340,7 +324,7 @@ O modelo optou pela arquitetura de rastreamento de tarefas usando `Promise.race`
 
 [detalhamento completo](models/anthropic.haiku4.5-estendido/resultado.md)
 
-### qwen.qwen3.6-max-preview
+#### #5 qwen.qwen3.6-max-preview
 
 em 26/04/2026
 
@@ -350,17 +334,7 @@ Este modelo gerou uma das implementações de *Worker Pool* mais performáticas 
 
 [detalhamento completo](models/qwen.qwen3.6-max-preview/resultado.md)
 
-### qwen.qwen3-235B-A22B-2507
-
-em 26/04/2026
-
-❌ Reprovado (Deadlock por Semáforo em Casos de Fronteira)
-
-Este modelo peso-pesado aplicou um padrão clássico de Ciência da Computação — o Semáforo (Semaphore) — para controlar a concorrência. Embora a lógica funcione perfeitamente para limites válidos, a implementação falha em aplicar a programação defensiva no início da função. Ao receber um `limit` igual a `0`, as tarefas entram na fila de espera do semáforo, mas como não há permissões iniciais, a fila nunca é processada. O Event Loop congela aguardando a resolução das Promises, causando um *Deadlock* irreversível que estoura os *timeouts* dos testes de estresse 4 e 8. Adicionalmente, utiliza `.shift()` na liberação da fila, gerando ineficiência $O(N)$.
-
-[detalhamento completo](models/qwen.qwen3-235B-A22B-2507/resultado.md)
-
-### google.gemma-4-26b-a4b
+#### #6 google.gemma-4-26b-a4b
 
 em 26/04/2026
 
@@ -370,7 +344,19 @@ O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concor
 
 [detalhamento completo](models/google.gemma-4-26b-a4b/resultado.md)
 
-### zai.glm4.7-flash
+#### #7 qwen.qwen3.6-35B-A3B
+
+em 26/04/2026
+
+⚠️ Aprovado em Runtime (com Dívida Técnica de Tipagem)
+
+O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*), apresentando a proteção correta contra limites inválidos (*Fail-Fast*). No entanto, a solução é o que chamamos de "Código Frankenstein". Ele gerencia a fila usando `indexOf` e `splice` (o que gera varreduras $O(N)$ desnecessárias) e comete um erro de tipagem estrita ao guardar objetos `Promise` em um array do tipo `R[]`. O código só brilha no final porque o `Promise.all()` consegue desempacotar as promessas no *runtime*, mascarando a poluição de estado. É funcional, mas reprovaria em um *Code Review* de TypeScript estrito (`tsc`).
+
+[detalhamento completo](models/qwen.qwen3.6-35B-A3B/resultado.md)
+
+### Códigos com Erro
+
+#### #1 zai.glm4.7-flash
 
 em 26/04/2026
 
@@ -380,12 +366,32 @@ O modelo construiu uma arquitetura híbrida de rastreamento com `Set` e `Promise
 
 [detalhamento completo](models/zai.glm4.7-flash/resultado.md)
 
-### openai.gpt5.3-codex-high
+#### #2 qwen.qwen3-coder
 
-em 27/04/2026
+em 26/04/2026
 
-🏆 Aprovado com Louvor (Gabarito Definitivo)
+❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
 
-Este modelo gerou a implementação perfeita. Ele combina a arquitetura de Worker Pool contínua com as melhores práticas de Clean Code e Defensive Programming. É o único modelo que modificou a assinatura para receber readonly T[], garantindo imutabilidade de dados em tempo de compilação. Trata os limites inválidos com RangeError estrito, instancia os workers de forma elegante com Array.from e passa em absolutamente todos os testes de estresse de concorrência e memória do motor V8 com tempos de execução mínimos.
+Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
 
-[detalhamento completo](models/openai.gpt5.3-codex-high/resultado.md)
+[detalhamento completo](models/qwen.qwen3-coder/resultado.md)
+
+#### #3 qwen.qwen3-235B-A22B-2507
+
+em 26/04/2026
+
+❌ Reprovado (Deadlock por Semáforo em Casos de Fronteira)
+
+Este modelo peso-pesado aplicou um padrão clássico de Ciência da Computação — o Semáforo (Semaphore) — para controlar a concorrência. Embora a lógica funcione perfeitamente para limites válidos, a implementação falha em aplicar a programação defensiva no início da função. Ao receber um `limit` igual a `0`, as tarefas entram na fila de espera do semáforo, mas como não há permissões iniciais, a fila nunca é processada. O Event Loop congela aguardando a resolução das Promises, causando um *Deadlock* irreversível que estoura os *timeouts* dos testes de estresse 4 e 8. Adicionalmente, utiliza `.shift()` na liberação da fila, gerando ineficiência $O(N)$.
+
+[detalhamento completo](models/qwen.qwen3-235B-A22B-2507/resultado.md)
+
+#### #4 unsloth.qwen3-coder-30b-a3b-instruct
+
+em 25/04/2026
+
+❌ Reprovado (Múltiplas Falhas Críticas)
+
+Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência assíncrona e quebra as regras mais básicas do compilador TypeScript.
+
+[detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md)
