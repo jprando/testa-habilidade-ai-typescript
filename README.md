@@ -268,7 +268,17 @@ A seguir você encontra a análise técnica (resumida) do código gerado pelo mo
 
 ### Códigos Vencedores
 
-#### #1 qwen.qwen3.6-27b
+#### #1 openai.gpt-5.5-high
+
+> em 27/04/2026
+
+🏆 Aprovado com Louvor (Gabarito Absoluto)
+
+A implementação definitiva do *benchmark*. Este modelo unifica a mais alta eficiência do motor JavaScript com práticas impecáveis de *Clean Code*. Ele impõe imutabilidade através de `readonly T[]`, rejeita limites inválidos ou fracionados com programação defensiva estrita (`RangeError`) e estrutura a *Worker Pool* usando um laço declarativo (`while (nextIndex < items.length)`). O código atinge latência mínima (1ms no teste de estresse de pilha) sem recorrer a recursão ou mutações de estado, estabelecendo o padrão-ouro de concorrência assíncrona.
+
+[detalhamento completo](models/openai.gpt-5.5-high/resultado.md)
+
+#### #2 qwen.qwen3.6-27b
 
 > em 26/04/2026
 
@@ -278,7 +288,7 @@ Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta d
 
 [detalhamento completo](models/qwen.qwen3.6-27b/resultado.md)
 
-#### #2 openai.gpt5.3-codex-high
+#### #3 openai.gpt5.3-codex-high
 
 > em 27/04/2026
 
