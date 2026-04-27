@@ -34,10 +34,35 @@ A combinação do cálculo de capacidade máxima (Math.min) com o mapeamento nat
 await Promise.all(Array.from({ length: Math.min(limit, total) }, worker));
 ```
 
-## 3. Análise de Falhas
+## 3. Análise de Falhas e Oportunidades (Code Review)
 
-Nenhuma falha detectada. O código gabaritou todos os testes de lógica, estresse, tipagem e preservação da Event Loop.
+### Dívida Estilística: O Anti-padrão `while(true)`
+
+Apesar de ter gabaritado todos os testes de estresse e performance, o modelo falhou no critério de "Elegância e Código Declarativo" ao estruturar o laço do worker da seguinte forma:
+
+```typescript
+while (true) {
+    const currentIndex = nextIndex++;
+    if (currentIndex >= total) break;
+    // ... lógica assíncrona
+}
+```
+
+* **Crítica Técnica**: Em TypeScript moderno, a assinatura de um laço deve ser autoexplicativa. O uso de `while(true)` oculta a condição de parada no corpo da função, exigindo que o revisor percorra todo o bloco para entender o fluxo.
+
+* **Refatoração Sugerida**: Para um código de nível "*Architect*", a condição de saída deve estar no cabeçalho: `while (nextIndex < total) { ... }`.
+
+O uso de loops infinitos com interrupção interna (`break`) aumenta a carga cognitiva de leitura. A prática sênior e declarativa exige que a condição de parada esteja na assinatura do laço. Para atingir a perfeição absoluta de estilo, o bloco deveria ser reescrito como:
+
+```typescript
+while (nextIndex < total) {
+    const currentIndex = nextIndex++;
+    results[currentIndex] = await asyncFn(items[currentIndex], currentIndex);
+}
+```
 
 ## 4. Veredito de Engenharia
 
-Código pronto para produção crítica. Este modelo entende perfeitamente a diferença entre controle de estado síncrono (ponteiros) e processamento assíncrono (microtasks), extraindo a máxima eficiência da thread do JavaScript sem sacrificar a legibilidade.
+Código pronto para produção crítica. Este modelo entende perfeitamente a diferença entre controle de estado síncrono (ponteiros) e processamento assíncrono (*microtasks*), extraindo a máxima eficiência da *thread* do JavaScript. Com um leve ajuste de legibilidade no `while`, é o gabarito definitivo para o ecossistema web moderno.
+
+O código é tecnicamente superior em termos de infraestrutura (uso de `RangeError`, `readonly` e ponteiros atômicos), mas carrega uma pequena dívida de Clean Code. É a solução mais próxima da perfeição testada até o momento, mas a escolha do loop imperativo o impede de ser considerado o "Gabarito Absoluto" sem ajustes manuais de estilo.

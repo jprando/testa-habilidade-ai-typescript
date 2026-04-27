@@ -80,15 +80,21 @@ Aqui está a implementação ideal utilizando a abordagem de *Worker Pool* (Fila
 
 ```typescript
 async function processWithLimit<T, R>(
-    items: T[],
+    items: readonly T[],
     asyncFn: (item: T, index: number) => Promise<R>,
     limit: number
 ): Promise<R[]> {
     // Proteção contra limites inválidos — falha: 15
-    if (limit <= 0) return [];
+    if (!Number.isInteger(limit) || limit < 1) {
+        throw new RangeError("`limit` deve ser um inteiro >= 1.");
+    }
+
+    // Otimização de comprimento e guarda contra array vazio — falha: 14
+    const _itemsLength = items.length;
+    if (_itemsLength === 0) return [];
 
     // Pré-aloca o array com tamanho fixo para manter a ordem original — falha: 9, 11
-    const results: R[] = new Array(items.length);
+    const results = new Array<R>(_itemsLength);
 
     // Ponteiro numérico compartilhado: evita shift/splice e varreduras O(N) — falha: 3, 7, 16
     let currentIndex = 0;
@@ -96,7 +102,7 @@ async function processWithLimit<T, R>(
     // Worker como loop iterativo assíncrono: sem recursão, sem mix de sintaxes — falha: 2, 12
     const worker = async () => {
         // Loop contínuo (fila): workers nunca ficam ociosos esperando lote terminar — falha: 1, 21
-        while (currentIndex < items.length) {
+        while (currentIndex < _itemsLength) {
             // Incremento atômico síncrono antes de qualquer await: evita race condition — falha: 13
             const index = currentIndex++;
 
@@ -106,7 +112,7 @@ async function processWithLimit<T, R>(
     };
 
     // Math.min evita instanciar workers fantasmas quando limit > items.length — falha: 14
-    const concurrency = Math.min(limit, items.length);
+    const concurrency = Math.min(limit, _itemsLength);
     // Array.from cria workers independentes: sem Promise.race, sem contador manual — falha: 8, 17, 18, 19
     const workers = Array.from({ length: concurrency }, worker);
 
@@ -262,19 +268,9 @@ A seguir você encontra a análise técnica (resumida) do código gerado pelo mo
 
 ### Códigos Vencedores
 
-#### #1 openai.gpt5.3-codex-high
+#### #1 qwen.qwen3.6-27b
 
-em 27/04/2026
-
-🏆 Aprovado com Louvor (Gabarito Definitivo)
-
-Este modelo gerou a implementação perfeita. Ele combina a arquitetura de Worker Pool contínua com as melhores práticas de Clean Code e Defensive Programming. É o único modelo que modificou a assinatura para receber readonly T[], garantindo imutabilidade de dados em tempo de compilação. Trata os limites inválidos com RangeError estrito, instancia os workers de forma elegante com Array.from e passa em absolutamente todos os testes de estresse de concorrência e memória do motor V8 com tempos de execução mínimos.
-
-[detalhamento completo](models/openai.gpt5.3-codex-high/resultado.md)
-
-#### #2 qwen.qwen3.6-27b
-
-em 26/04/2026
+> em 26/04/2026
 
 ✅ Aprovado (Código Sênior Impecável)
 
@@ -282,31 +278,31 @@ Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta d
 
 [detalhamento completo](models/qwen.qwen3.6-27b/resultado.md)
 
+#### #2 openai.gpt5.3-codex-high
+
+> em 27/04/2026
+
+⚠️ Aprovado (Dívida Técnica de Estilo)
+
+Este modelo entregou a arquitetura mais robusta e segura do *benchmark*, sendo o único a utilizar `readonly T[]` para garantir a imutabilidade do `array` de entrada. Implementa o padrão *Worker Pool* com eficiência máxima. No entanto, o código não atinge a perfeição absoluta devido ao uso do anti-padrão `while(true)` com interrupção interna (`break`). Embora funcionalmente impecável e imune a todos os erros de concorrência, essa escolha imperativa aumenta a carga cognitiva de manutenção em comparação com uma abordagem declarativa.
+
+[detalhamento completo](models/openai.gpt5.3-codex-high/resultado.md)
+
 ### Passaram nos Testes (com Ressalvas)
 
-#### #1 openai.gpt-oss-20b
+#### #1 anthropic.sonnet4.6-adaptativo
 
-em 25/04/2026
-
-✅ Aprovado (Código Sênior com ressalva de fronteira)
-
-Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de *Worker Pool* (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da *engine* *V8* ao retornar a cadeia de *Promises* diretamente, economizando um ciclo do *Event Loop*. Suas únicas penalidades foram uma escolha estilística questionável (uso de `while(true)` com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
-
-[detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
-
-#### #2 anthropic.sonnet4.6-adaptativo
-
-em 26/04/2026
+> em 26/04/2026
 
 ⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
 
-O modelo entregou uma das soluções mais elegantes e enxutas do benchmark. Utilizou `Array.from` para inicializar a *Worker Pool* de forma limpa e demonstrou domínio profundo do TypeScript ao usar o Non-Null Assertion Operator (`!`) para garantir a tipagem estrita no loop. Contudo, assim como o modelo da OpenAI (GPT-OSS), ele falhou no caso de fronteira do Limite Zero (Falha 15), esquecendo a cláusula de guarda inicial e devolvendo um *Array Esburacado* em tempo de execução.
+O modelo entregou uma das soluções mais elegantes e enxutas do *benchmark*. Utilizou `Array.from` para inicializar a *Worker Pool* de forma limpa e demonstrou domínio profundo do TypeScript ao usar o Non-Null Assertion Operator (`!`) para garantir a tipagem estrita no loop. Contudo, assim como o modelo da OpenAI (GPT-OSS), ele falhou no caso de fronteira do Limite Zero (Falha 15), esquecendo a cláusula de guarda inicial e devolvendo um *Array Esburacado* em tempo de execução.
 
 [detalhamento completo](models/anthropic.sonnet4.6-adaptativo/resultado.md)
 
-#### #3 google.gemini3.1-pro
+#### #2 google.gemini3.1-pro
 
-em 26/04/2026
+> em 26/04/2026
 
 ⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
 
@@ -314,9 +310,19 @@ O modelo entregou uma implementação clássica e muito limpa do padrão *Worker
 
 [detalhamento completo](models/google.gemini3.1-pro/resultado.md)
 
+#### #3 openai.gpt-oss-20b
+
+> em 25/04/2026
+
+⚠️ Aprovado (Código Sênior com ressalva de fronteira)
+
+Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de *Worker Pool* (Fila Contínua) e blindando o código contra gargalos de ociosidade. Ele demonstrou um conhecimento avançado da *engine* *V8* ao retornar a cadeia de *Promises* diretamente, economizando um ciclo do *Event Loop*. Suas únicas penalidades foram uma escolha estilística questionável (uso de `while(true)` com quebra interna) e a falha em um caso extremo matemático (Falha 15): o modelo aloca a memória do array antes de validar se o limite é zero ou negativo, o que pode resultar na devolução de um "array esburacado" em tempo de execução.
+
+[detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
+
 #### #4 anthropic.haiku4.5-estendido
 
-em 26/04/2026
+> em 26/04/2026
 
 ⚠️ Aprovado com Ressalvas (Alternativa O(1), falha em Edge Case)
 
@@ -326,7 +332,7 @@ O modelo optou pela arquitetura de rastreamento de tarefas usando `Promise.race`
 
 #### #5 qwen.qwen3.6-max-preview
 
-em 26/04/2026
+> em 26/04/2026
 
 ⚠️ Aprovado com Ressalvas (Código Sênior, Falha por Fallback Silencioso)
 
@@ -336,7 +342,7 @@ Este modelo gerou uma das implementações de *Worker Pool* mais performáticas 
 
 #### #6 google.gemma-4-26b-a4b
 
-em 26/04/2026
+> em 26/04/2026
 
 ⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
 
@@ -346,7 +352,7 @@ O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concor
 
 #### #7 qwen.qwen3.6-35B-A3B
 
-em 26/04/2026
+> em 26/04/2026
 
 ⚠️ Aprovado em Runtime (com Dívida Técnica de Tipagem)
 
@@ -358,7 +364,7 @@ O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*),
 
 #### #1 zai.glm4.7-flash
 
-em 26/04/2026
+> em 26/04/2026
 
 ❌ Reprovado (Unhandled Promise Rejection)
 
@@ -366,19 +372,9 @@ O modelo construiu uma arquitetura híbrida de rastreamento com `Set` e `Promise
 
 [detalhamento completo](models/zai.glm4.7-flash/resultado.md)
 
-#### #2 qwen.qwen3-coder
+#### #2 qwen.qwen3-235B-A22B-2507
 
-em 26/04/2026
-
-❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
-
-Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
-
-[detalhamento completo](models/qwen.qwen3-coder/resultado.md)
-
-#### #3 qwen.qwen3-235B-A22B-2507
-
-em 26/04/2026
+> em 26/04/2026
 
 ❌ Reprovado (Deadlock por Semáforo em Casos de Fronteira)
 
@@ -386,9 +382,19 @@ Este modelo peso-pesado aplicou um padrão clássico de Ciência da Computação
 
 [detalhamento completo](models/qwen.qwen3-235B-A22B-2507/resultado.md)
 
+#### #3 qwen.qwen3-coder
+
+> em 26/04/2026
+
+❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
+
+Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas: após o race, ele remove a tarefa recém-criada em vez da tarefa que efetivamente terminou. Isso corrompe a fila de rastreamento. Como resultado, o `Promise.all` final não aguarda as tarefas corretas, a função retorna prematuramente e devolve um array cheio de buracos (`undefined`), falhando severamente em 3 testes de estresse.
+
+[detalhamento completo](models/qwen.qwen3-coder/resultado.md)
+
 #### #4 unsloth.qwen3-coder-30b-a3b-instruct
 
-em 25/04/2026
+> em 25/04/2026
 
 ❌ Reprovado (Múltiplas Falhas Críticas)
 
