@@ -360,7 +360,7 @@ O modelo entregou uma implementação extremamente performática da *Worker Pool
 
 [detalhamento completo](models/anthropic.opus4.7/resultado.md)
 
-#### #7 google.gemma-4-26b-a4b
+#### #7 google.gemma4-26b-a4b
 
 > em 26/04/2026
 
@@ -368,9 +368,19 @@ O modelo entregou uma implementação extremamente performática da *Worker Pool
 
 O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concorrência de forma nativa e sem gargalos de CPU (passando facilmente nos testes de carga). No entanto, pecou em dois pontos técnicos sutis: primeiro, falhou no tratamento da fronteira matemática (Falha 15), esquecendo a cláusula de guarda para limites iguais a zero e alocando um "array esburacado". Segundo, introduziu uma checagem condicional inútil (*Dead Code*) baseada na alucinação de que o incremento síncrono do JavaScript poderia sofrer condição de corrida antes do `await`.
 
-[detalhamento completo](models/google.gemma-4-26b-a4b/resultado.md)
+[detalhamento completo](models/google.gemma4-26b-a4b/resultado.md)
 
-#### #8 qwen.qwen3.6-35B-A3B
+### #8 google.gemma4-e4b
+
+> em 28/04/2026
+
+⚠️ Aprovado em Runtime (com Ressalvas Estruturais e Dívida de Tipagem)
+
+O modelo gemma4-e4b demonstrou excelência funcional ao ser aprovado em todos os testes da suíte de estresse, empregando corretamente laços iterativos para evitar quebra de pilha por recursão e garantindo a preservação da ordem dos resultados em complexidade O(1). Apesar da lógica impecável, o código original apresentou ineficiências estruturais e práticas ruins para bibliotecas, como o vazamento de exceções via console.error, degradação da segurança do TypeScript por meio de tipagens forçadas (as unknown) e alocação desnecessária de memória em laços de alta concorrência (Array.from). A refatoração corrigiu esses desvios, resultando em uma arquitetura mais limpa e idiomática, que delega o tratamento de erros ao consumidor e otimiza a performance do Garbage Collector ao utilizar estruturas nativas iteráveis de forma eficiente.
+
+[detalhamento completo](models/google.gemma4-e4b/resultado.md)
+
+#### #9 qwen.qwen3.6-35B-A3B
 
 > em 26/04/2026
 

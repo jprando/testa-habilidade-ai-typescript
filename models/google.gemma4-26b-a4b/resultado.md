@@ -1,4 +1,4 @@
-# google.gemma-4-26b-a4b
+# google.gemma4-26b-a4b
 
 | Critério | Status |
 | :--- | :--- |
