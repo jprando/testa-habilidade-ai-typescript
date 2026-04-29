@@ -330,6 +330,16 @@ Este modelo apresentou uma solução extremamente robusta e performática, imple
 
 [detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
 
+#### poolsize.aguna-xs2
+
+> em 29/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma das soluções mais curtas, elegantes e brilhantes de todo o *benchmark*. Ao utilizar uma matriz de iterações assíncronas resolvidas nativamente por um único `Promise.all()`, o código demonstrou profundo domínio do *Event Loop* da *V8* e dispensou completamente o uso de tipagens forçadas ou complexidade estrutural. Contudo, assim como outros modelos de ponta, caiu na armadilha da Cegueira Matemática (Falha 8/15). Por esquecer de implementar programação defensiva (`if (limit <= 0)`), o algoritmo cria um *pool* de *workers* vazio caso o limite seja zero, resolvendo a promessa imediatamente e devolvendo um indesejado "Array Esburacado" (*sparse array*) como resultado.
+
+[detalhamento completo](models/poolside.laguna-xs2/resultado.md)
+
 #### #4 anthropic.haiku4.5-estendido
 
 > em 26/04/2026
