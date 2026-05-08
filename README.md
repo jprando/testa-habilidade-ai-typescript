@@ -1,3 +1,417 @@
 # 🤖 LLM Concurrency Benchmark: O Teste de Fogo em TypeScript
 
-Este repositório existe para separar os modelos seniores dos juniores. O objetivo não é resolver um algoritmo de faculdade, mas sim um problema real e crítico de engenharia de software: **Controle[...]
+Este repositório existe para separar os modelos seniores dos juniores. O objetivo não é resolver um algoritmo de faculdade, mas sim um problema real e crítico de engenharia de software: **Controle de concorrência e gerenciamento de recursos**.
+
+A ideia central é medir a capacidade de raciocínio de modelos de linguagem (LLMs) diante de desafios de concorrência e gerenciamento de recursos no motor *V8* (*JavaScript*/*TypeScript*).
+
+## 📂 Organização do Projeto
+
+O repositório está estruturado para suportar o teste de múltiplos modelos de forma isolada e comparável:
+
+```text
+❯ ls -la
+.
+├── models/
+│   ├── openai.gpt-oss-20b/                    # [Empresa].[Nome-do-Modelo] (separador: ".")
+│   │   ├── processWithLimit.ts                # Código gerado pela IA
+│   │   ├── processWithLimit.test.ts           # Cópia local da suíte de teste
+│   │   └── resultado.md                       # Relatório de análise
+│   └── unsloth.qwen3-coder-30b-a3b-instruct/  # [Usuário].[Nome-do-Modelo] (separador: ".")
+│       ├── processWithLimit.ts                # Código gerado pela IA
+│       ├── processWithLimit.test.ts           # Cópia local da suíte de teste
+│       └── resultado.md                       # Relatório de análise
+├── template/
+│   └── processWithLimit.test.ts               # Template mestre da suíte de testes (23 Falhas)
+├── images/                                    # Capturas de tela dos resultados
+├── README.md                                  # Apresentação e guia do projeto
+└── package.json                               # Configuração do projeto
+```
+
+## 🚀 Como Utilizar (*Onboarding* para *DEVs*)
+
+Para testar como uma nova IA se comporta, siga este fluxo:
+
+1. **Crie a pasta do modelo:** Crie uma pasta dentro de `models/` seguindo o padrão `empresa-ou-usuario.modelo-especificacao`.
+2. **Gere a implementação:** Envie o [Prompt de Referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) para a IA e salve o código resultante como `processWithLimit.ts` dentro da pasta criada.
+3. **Prepare o Benchmark:** Copie somente o arquivo `template/processWithLimit.test.ts` da raiz para dentro da pasta do modelo.
+   > 💡 **Dica (Linux/Macos):** No lugar de copiar, você pode criar um link simbólico para sempre refletir a versão mais recente do template: `ln -s $CAMINHOCOMPLETOPARAOPROJETO/template/processWithLimit.test.ts processWithLimit.test.ts`
+4. **Execute o Teste:**
+
+    ```bash
+    cd models/nome-da-pasta-do-modelo
+    bun test
+    ```
+
+    ![resultado do teste com openai.gpt-oss-20b](images/openai.gpt-oss-20b.png)
+
+> **Nota de Diagnóstico:** Se o comando `bun test` travar e resultar em `timeout after 5000ms`, a implementação da IA falhou nos critérios de ***Deadlock*** ou ***Polling Infinito***.
+
+---
+
+### 1. O Prompt para você copiar e colar nas IAs
+
+Copie o bloco abaixo e envie para a IA que você deseja testar:
+
+```text
+Atue como um Engenheiro de Software Sênior especialista em TypeScript (e na engine do JavaScript (V8)).
+
+Utilize somente as informações do seu próprio modelo.
+
+Escreva uma função chamada `processWithLimit` que executa tarefas assíncronas com um limite máximo de concorrência.
+
+**Requisitos da Assinatura:**
+- A função deve receber três parâmetros: um array de itens do tipo `T`, uma função iteradora assíncrona `asyncFn` (que recebe um item e seu índice, retornando uma `Promise<R>`), e um número inteiro positivo `limit`.
+- A função deve retornar uma `Promise<R[]>` contendo todos os resultados na exata mesma ordem do array de itens original.
+
+**Regras de Implementação (Obrigatórias):**
+1. **Tipagem Estrita:** Utilize Generics (`T` e `R`) para inferir corretamente os tipos de entrada e saída. Nenhuma tipagem `any` ou `unknown` é permitida como bypass.
+2. **Sem Recursão:** É estritamente proibido utilizar qualquer tipo de recursão na sua lógica. Resolva o problema de forma iterativa.
+3. **Eficiência:** O código deve ser altamente performático. Evite mutações no array original (como `shift` ou `splice`) e garanta que os "workers" não fiquem ociosos se houver tarefas pendentes.
+4. **Elegância:** Utilize os recursos modernos do JavaScript/TypeScript (como `async/await`, desestruturação, etc.).
+
+Apresente apenas a função implementada e uma breve explicação das suas escolhas arquiteturais.
+```
+
+---
+
+### 2. A Resposta Correta (Gabarito)
+
+Aqui está a implementação ideal utilizando a abordagem de *Worker Pool* (Fila Contínua), focada em máxima eficiência, tipagem perfeita e zero recursão. Use este código para comparar com o que as outras IAs gerarem:
+
+```typescript
+async function processWithLimit<T, R>(
+    items: readonly T[],
+    asyncFn: (item: T, index: number) => Promise<R>,
+    limit: number
+): Promise<R[]> {
+    // Proteção contra limites inválidos — falha: 15
+    if (!Number.isInteger(limit) || limit < 1) {
+        throw new RangeError("`limit` deve ser um inteiro >= 1.");
+    }
+
+    // Otimização de comprimento e guarda contra array vazio — falha: 14
+    const _itemsLength = items.length;
+    if (_itemsLength === 0) return [];
+
+    // Pré-aloca o array com tamanho fixo para manter a ordem original — falha: 9, 11
+    const results = new Array<R>(_itemsLength);
+
+    // Ponteiro numérico compartilhado: evita shift/splice e varreduras O(N) — falha: 3, 7, 16
+    let currentIndex = 0;
+
+    // Worker como loop iterativo assíncrono: sem recursão, sem mix de sintaxes — falha: 2, 12
+    const worker = async () => {
+        // Loop contínuo (fila): workers nunca ficam ociosos esperando lote terminar — falha: 1, 21
+        while (currentIndex < _itemsLength) {
+            // Incremento atômico síncrono antes de qualquer await: evita race condition — falha: 13
+            const index = currentIndex++;
+
+            // await garante concorrência real; slot indexado preserva ordem; valor resolvido (não Promise) — falha: 4, 6, 10, 20
+            results[index] = await asyncFn(items[index], index);
+        }
+    };
+
+    // Math.min evita instanciar workers fantasmas quando limit > items.length — falha: 14
+    const concurrency = Math.min(limit, _itemsLength);
+    // Array.from cria workers independentes: sem Promise.race, sem contador manual — falha: 8, 17, 18, 19
+    const workers = Array.from({ length: concurrency }, worker);
+
+    // Bloqueia até todos os workers terminarem: sem retorno prematuro, sem polling — falha: 5, 22, 23
+    await Promise.all(workers);
+
+    return results;
+}
+```
+
+---
+
+### 3. O Que Avaliar nas Respostas das IAs
+
+> 💡 **Quer pular a teoria?** [Ir direto para os resultados dos modelos testados.](#resultado-da-execução-do-teste)
+
+Ao receber a resposta das outras inteligências, observe os seguintes pontos de falha comuns:
+
+* **Falha 1: Uso de "Chunks" (Lotes bloqueantes).**
+  * *O erro:* A IA divide o array em pedaços (ex: de 5 em 5) e usa um loop com `Promise.all` em cada pedaço.
+  * *Por que é ruim:* Isso não é limite de concorrência real. Se 4 tarefas de um lote terminarem rápido e 1 demorar, o sistema inteiro fica travado esperando essa 1 tarefa terminar antes de puxar a próxima da fila.
+
+* **Falha 2: Uso de Recursão.**
+  * *O erro:* A IA cria uma função interna que chama a si mesma quando a `Promise` resolve.
+  * *Por que é ruim:* Desrespeita a regra 2 do seu prompt. Além disso, em listas massivas, pode estourar a *call stack* (*Stack Overflow*). O gabarito usa um simples e eficiente loop `while`.
+
+* **Falha 3: Mutação de Array (`shift()`).**
+  * *O erro:* A IA usa um loop e vai removendo o primeiro item do array de entrada usando `items.shift()`.
+  * *Por que é ruim:* Em JavaScript, `.shift()` em arrays grandes é uma operação custosa (O(n)), pois exige o re-indexamento de todos os elementos restantes a cada remoção. O gabarito usa um ponteiro numérico O(1).
+
+* **Falha 4: Perda de Ordem Original.**
+  * *O erro:* A IA faz um push (`results.push()`) conforme as tarefas terminam.
+  * *Por que é ruim:* Como as promessas resolvem em tempos diferentes, o array final ficará fora de ordem em relação à entrada. O gabarito resolve isso usando o `index` original pré-calculado: `results[index] = ...`.
+
+* **Falha 5: Ausência de Bloqueio Final (Retorno Prematuro)**
+  * *O erro:* O modelo cria o loop que dispara os workers, mas esquece de incluir um `await Promise.all(...)` no final do processo principal, executando o `return results` imediatamente.
+  * *Por que é ruim:* A função retorna um array vazio (ou cheio de `undefined`) em milissegundos, enquanto as tarefas assíncronas continuam rodando soltas (em *background*) como processos fantasma.
+
+* **Falha 6: Falsa Concorrência por Falta de `await` (Sobrecarga)**
+  * *O erro:* O modelo até tenta montar a lógica, mas na hora de executar a tarefa faz algo como `results[i] = asyncFn(...)` sem o `await` ou sem colocar isso dentro de uma estrutura que aguarde a resolução corretamente.
+  * *Por que é ruim:* O limite de concorrência é totalmente ignorado. O loop varre o array em milissegundos e dispara 1.000 requisições simultâneas, podendo derrubar bancos de dados ou tomar *rate limit* de APIs.
+
+* **Falha 7: Ineficiência no *Pool* de *Workers* (Uso de *Arrays* Ativos)**
+  * *O erro:* A IA tenta controlar os workers criando um array auxiliar (ex: `activePromises`) e usa métodos como `.indexOf()` e `.splice()` toda vez que uma tarefa termina para removê-la da lista.
+  * *Por que é ruim:* Esses métodos varrem e reindexam o array, o que tem complexidade $O(N)$. Fazer isso dentro de um loop para cada item concluído destrói a performance da CPU em listas massivas.
+
+* **Falha 8: Deadlock com `Promise.race`**
+  * *O erro:* Na tentativa de liberar espaço no limite de workers, o modelo cria um gargalo usando `await Promise.race(activeWorkers)`, mas comete o erro de acionar isso quando o array ainda está vazio.
+  * *Por que é ruim:* Em JavaScript, um `Promise.race` com um array vazio nunca resolve. O código entra em *deadlock* (trava infinitamente) logo no primeiro milissegundo de execução.
+
+* **Falha 9: Perda de Tipagem e "Type Juggling" (Gambiarra de Tipos)**
+  * *O erro:* A IA não consegue satisfazer o compilador do TypeScript de forma limpa e apela para instanciar o array sem o Generic (`new Array()` que vira `any[]`), ignora que o tipo `R` pode validar o contrato de saída, ou força coerções artificiais para calar o compilador.
+  * *Por que é ruim:* Quebra o propósito primário do TypeScript: a segurança de tipos. Esconde erros que deveriam ser pegos no momento da compilação, permitindo que código frágil vá para produção.
+
+* **Falha 10: Silenciamento de Erros (*Anti-pattern* de `try/catch`)**
+  * *O erro:* A IA toma a liberdade de engolir possíveis falhas da função colocando a execução num `try/catch` que apenas faz um `console.error` e manda o loop continuar.
+  * *Por que é ruim:* Se a tarefa do índice 2 falhar, o código segue em frente. O array retornado terá um "buraco" no meio. Em concorrência padrão no JavaScript, o correto é que, se uma sub-tarefa falhar, a `Promise` principal também falhe.
+
+* **Falha 11: Realocação Dinâmica de Memória**
+  * *O erro:* O modelo começa com um array vazio `const results: R[] = [];` e depois o preenche fora de ordem saltando índices (ex: `results[99] = valor`).
+  * *Por que é ruim:* Quando você joga valores em índices muito altos de um array inicializado vazio, você força a *engine* do JavaScript a ficar realocando memória e transformando um array compacto em uma estrutura esparsa menos eficiente.
+
+* **Falha 12: Mistura de Sintaxes e Padrões (O Código *Frankenstein*)**
+  * *O erro:* A IA usa o moderno `async/await` mas, no meio da lógica, emenda cadeias antigas de `.then().finally()` ou cria Funções Invocadas Imediatamente (*IIFEs*) assíncronas totalmente desnecessárias.
+  * *Por que é ruim:* Além de ser visualmente feio e difícil de dar manutenção, esse "contorcionismo" sintático frequentemente gera armadilhas de escopo, mutação de estado invisível e perda de clareza arquitetural.
+
+* **Falha 13: Condição de Corrida (*Race Condition*) no Ponteiro**
+  * *O erro*: O modelo cria o ponteiro compartilhado, mas faz operações assíncronas antes de incrementá-lo.
+  * *Por que é ruim*: No JavaScript, o código pausa no `await` e libera a *thread* para outros *workers*. Se 5 *workers* chegarem ao mesmo tempo, todos lerão o `nextIndex` como 0. Todos farão a tarefa duplicada.
+
+    Exemplo de código ruim:
+
+    ```typescript
+    const index = nextIndex;
+    await algumaCoisa();
+    nextIndex++;
+    ```
+
+* **Falha 14: Superlotação de *Workers* (*Over-provisioning*)**
+  * *O erro*: A IA confia cegamente no número passado na variável limit para instanciar as tarefas, ignorando o tamanho do array de entrada. Fazendo um loop fixo tipo `for(let i = 0; i < limit; i++)`.
+  * *Por que é ruim*: Imagine que você receba um array com apenas 2 itens, mas, por segurança global do sistema, passou `limit = 1000`. O código vai instanciar 998 *workers* fantasmas que não têm trabalho algum a fazer.
+
+* **Falha 15: Cegueira para Casos de Contorno (Limites Inválidos)**
+  * *O erro*: A IA assume que todos os parâmetros recebidos serão perfeitos e felizes, esquecendo de validar se o limite faz sentido matemático.
+  * *Por que é ruim*: O que acontece se outro pedaço do seu sistema calcular o limite dinamicamente e, por algum bug, passar `limit = 0` ou `limit = -1`? A maioria dos códigos gerados por IAs vai entrar em comportamento indefinido, silencioso ou travado.
+
+* **Falha 16: Efeito Colateral na Referência (*Mutation Side-Effects*)**
+  * *O erro*: A IA tenta driblar a complexidade alterando o array de entrada para facilitar a própria vida. Por exemplo, ela faz um `items.reverse()` logo na primeira linha e depois vai usando `.pop()`.
+  * *Por que é ruim*: Em JavaScript, arrays e objetos são passados por referência. Se a função `processWithLimit` alterar o array `items` internamente, ela vai destruir os dados originais no componente chamador e introduzir bugs colaterais difíceis de rastrear.
+
+* **Falha 17: A Armadilha da Promessa Resolvida no `Promise.race`**
+  * *O erro*: Acumular promessas em um único array e passar esse array inteiro repetidas vezes para o `Promise.race()` (ex: `Promise.race(results)`).
+  * *Por que reprova*: Em JavaScript, se você passar uma `Promise` que já foi concluída para um `Promise.race`, ele resolve imediatamente, sem esperar por mais nada. Quando a primeira tarefa do pool termina, o mecanismo inteiro degrada em comportamento incorreto.
+
+* **Falha 18: Varredura $O(N)$ Oculta no Loop (Gargalo de CPU)**
+  * *O erro*: Usar métodos de iteração de array como `.filter()`, `.map()` ou `.reduce()` dentro do loop de concorrência (ex: `results.filter(p => p !== null)`).
+  * *Por que reprova*: Isso cria uma complexidade $O(N^2)$ invisível. Se houver 10.000 itens, nas últimas execuções o *Node.js* estará varrendo um array de 10.000 posições a cada milissegundo à toa.
+
+* **Falha 19: Dessincronização de Estado (*State Desync*)**
+  * *O erro*: Confiar na resolução de um `Promise.race` para alterar contadores matemáticos de forma cega (ex: `await Promise.race(...); inProgressCount--;`).
+  * *Por que reprova*: O `Promise.race` avisa quando a primeira promessa termina. Mas e se duas ou três tarefas super rápidas terminarem exatamente no mesmo milissegundo? O código subtrai apenas 1 e o estado interno fica mentindo.
+
+* **Falha 20: Poluição do Array de Resultados (*State Pollution*)**
+  * *O erro*: Usar o array final de resultados para armazenar os objetos `Promise` pendentes durante o processamento, deixando para o `Promise.all` final o trabalho de desembrulhar os valores.
+  * *Por que reprova*: É uma falha arquitetural de responsabilidade. O array de `results` (tipado como `R[]`) deve guardar apenas os valores finais já resolvidos. Misturar objetos `Promise` com valores concretos polui o contrato mental da estrutura.
+
+* **Falha 21: Quebra de Loop Irreversível (Impedância Síncrono/Assíncrono)**
+  * *O erro*: Usar `break` num loop `for` síncrono quando o limite é atingido, esperando que a conclusão de uma tarefa assíncrona consiga "retomar" esse loop no futuro.
+  * *Por que reprova*: O JavaScript não funciona assim. O loop síncrono morre imediatamente. Quando a tarefa termina e tenta iniciar o próximo item, o fluxo principal já desapareceu da *Call Stack*.
+
+* **Falha 22: Mutação de Escopo Morto (*Ghost Mutation*)**
+  * *O erro*: Tentar alterar a variável de controle de um loop (como fazer um `i--`) dentro de um bloco assíncrono `.then()` ou `.finally()`.
+  * *Por que reprova*: Devido ao funcionamento de *Closures*, o callback assíncrono modifica uma cópia da variável isolada na memória, muito tempo depois do loop original ter encerrado. É uma operação sem efeito prático útil.
+
+* **Falha 23: *Polling* Assíncrono (O *Anti-Padrão* do `setTimeout`)**
+  * *O erro*: Criar uma função recursiva com `setTimeout` para checar a cada X milissegundos se as tarefas terminaram (ex: `if (inProgress === 0) resolve() else setTimeout()`).
+  * *Por que reprova*: É uma aberração em sistemas orientados a eventos. Desperdiça ciclos de CPU acordando o motor *V8* repetidas vezes sem necessidade, adiciona latência artificial à resposta final e costuma mascarar bugs de sincronização.
+
+* **Falha 24: Ausência de Imutabilidade na Assinatura (`readonly T[]`)**
+  * *O erro*: A IA declara o parâmetro de entrada como `items: T[]` em vez de `items: readonly T[]`, mesmo quando a função apenas consome os dados e não precisa mutá-los.
+  * *Por que é ruim*: Em TypeScript, `readonly T[]` comunica na própria API a intenção de não mutação, aumenta a segurança sem custo de *runtime*, impede efeitos colaterais acidentais e torna o contrato da função mais sênior e mais preciso.
+  * *Como avaliar*: Se a função usa `readonly T[]`, isso é um ponto positivo de design. Se usa apenas `T[]`, mas não muta o array, marque como **ressalva/dívida técnica**. Se além disso muta o array, a implementação também incorre na **Falha 16**.
+
+## Resultado da execução do teste
+
+A seguir você encontra a análise técnica (resumida) do código gerado pelo modelo, com apenas uma única submissão do [prompt de referência](#1-o-prompt-para-você-copiar-e-colar-nas-ias) e testado no ambiente do projeto.
+
+### Códigos Vencedores
+
+#### #1 openai.gpt-5.5-high
+
+> em 27/04/2026
+
+🏆 Aprovado com Louvor (Gabarito Absoluto)
+
+A implementação definitiva do *benchmark*. Este modelo unifica a mais alta eficiência do motor JavaScript com práticas impecáveis de *Clean Code*. Ele impõe imutabilidade através de `readonly T[]`, usa *Worker Pool* iterativo puro e demonstra domínio completo do contrato da função.
+
+[detalhamento completo](models/openai.gpt-5.5-high/resultado.md)
+
+#### #2 qwen.qwen3.6-27b
+
+> em 26/04/2026
+
+✅ Aprovado (Código Sênior Impecável)
+
+Este modelo gerou a implementação ideal. Ele construiu a arquitetura correta de *Worker Pool* (Fila Contínua), otimizou o uso de memória e gerenciou perfeitamente o *Event Loop*. O grande diferencial está na limpeza arquitetural da solução.
+
+[detalhamento completo](models/qwen.qwen3.6-27b/resultado.md)
+
+#### #3 openai.gpt5.3-codex-high
+
+> em 27/04/2026
+
+⚠️ Aprovado (Dívida Técnica de Estilo)
+
+Este modelo entregou a arquitetura mais robusta e segura do *benchmark*, sendo o único a utilizar `readonly T[]` para garantir a imutabilidade do `array` de entrada. Implementa o padrão *Worker Pool* com excelente controle de ordem e concorrência.
+
+[detalhamento completo](models/openai.gpt5.3-codex-high/resultado.md)
+
+### Passaram nos Testes (com Ressalvas)
+
+#### #1 anthropic.sonnet4.6-adaptativo
+
+> em 26/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma das soluções mais elegantes e enxutas do *benchmark*. Utilizou `Array.from` para inicializar a *Worker Pool* de forma limpa e demonstrou domínio profundo do TypeScript ao usar uma arquitetura iterativa precisa.
+
+[detalhamento completo](models/anthropic.sonnet4.6-adaptativo/resultado.md)
+
+#### #2 google.gemini3.1-pro
+
+> em 26/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma implementação clássica e muito limpa do padrão *Worker Pool*. Ele evita sobrecarga usando `Math.min` para calcular os workers necessários e gerencia o ponteiro atômico `currentIndex` com disciplina correta.
+
+[detalhamento completo](models/google.gemini3.1-pro/resultado.md)
+
+#### #3 openai.gpt-oss-20b
+
+> em 25/04/2026
+
+⚠️ Aprovado (Código Sênior com ressalva de fronteira)
+
+Este modelo apresentou uma solução extremamente robusta e performática, implementando perfeitamente o padrão de *Worker Pool* (Fila Contínua) e blindando o código contra gargalos de ociosidade.
+
+[detalhamento completo](models/openai.gpt-oss-20b/resultado.md)
+
+#### poolsize.aguna-xs2
+
+> em 29/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma das soluções mais curtas, elegantes e brilhantes de todo o *benchmark*. Ao utilizar uma matriz de iterações assíncronas resolvidas nativamente por um único `Promise.all()`, mostrou excelente domínio do motor JavaScript.
+
+[detalhamento completo](models/poolside.laguna-xs2/resultado.md)
+
+#### #4 anthropic.haiku4.5-estendido
+
+> em 26/04/2026
+
+⚠️ Aprovado com Ressalvas (Alternativa O(1), falha em Edge Case)
+
+O modelo optou pela arquitetura de rastreamento de tarefas usando `Promise.race`, mas demonstrou excelente senioridade ao utilizar um `Set` em vez de um `Array` para gerenciar a fila. Isso garantiu desempenho constante na remoção das tarefas ativas.
+
+[detalhamento completo](models/anthropic.haiku4.5-estendido/resultado.md)
+
+#### #5 qwen.qwen3.6-max-preview
+
+> em 26/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, Falha por Fallback Silencioso)
+
+Este modelo gerou uma das implementações de *Worker Pool* mais performáticas e limpas em termos de alocação de memória (evitando `.push` e criando arrays de tamanho exato). No entanto, reprovou no critério de propagação de erro ao inserir um fallback silencioso.
+
+[detalhamento completo](models/qwen.qwen3.6-max-preview/resultado.md)
+
+#### #6 anthropic.opus4.7
+
+> em 27/04/2026
+
+⚠️ Aprovado com Ressalvas (Fallback Silencioso e Dívida de Estilo)
+
+O modelo entregou uma implementação extremamente performática da *Worker Pool*, fazendo uso de *Bitwise Operators* (`limit | 0`) para coerção de inteiros de altíssima velocidade e mantendo a segurança de ordem dos resultados.
+
+[detalhamento completo](models/anthropic.opus4.7/resultado.md)
+
+#### #7 google.gemma4-26b-a4b
+
+> em 26/04/2026
+
+⚠️ Aprovado com Ressalvas (Código Sênior, falha em Edge Case)
+
+O modelo entregou uma arquitetura sólida de *Worker Pool*, gerenciando a concorrência de forma nativa e sem gargalos de CPU (passando facilmente nos testes de carga). No entanto, pecou em dois pontos de borda.
+
+[detalhamento completo](models/google.gemma4-26b-a4b/resultado.md)
+
+### #8 google.gemma4-e4b
+
+> em 28/04/2026
+
+⚠️ Aprovado em Runtime (com Ressalvas Estruturais e Dívida de Tipagem)
+
+O modelo gemma4-e4b demonstrou excelência funcional ao ser aprovado em todos os testes da suíte de estresse, empregando corretamente laços iterativos para evitar quebra de pilha por recursão e garantindo boa disciplina de concorrência.
+
+[detalhamento completo](models/google.gemma4-e4b/resultado.md)
+
+#### #9 qwen.qwen3.6-35B-A3B
+
+> em 26/04/2026
+
+⚠️ Aprovado em Runtime (com Dívida Técnica de Tipagem)
+
+O modelo passou em 100% dos testes lógicos e de estresse no motor *V8* (*Bun*), apresentando a proteção correta contra limites inválidos (*Fail-Fast*). No entanto, a solução é o que chamamos de aprovação apenas em runtime.
+
+[detalhamento completo](models/qwen.qwen3.6-35B-A3B/resultado.md)
+
+### Códigos com Erro
+
+#### #1 zai.glm4.7-flash
+
+> em 26/04/2026
+
+❌ Reprovado (Unhandled Promise Rejection)
+
+O modelo construiu uma arquitetura híbrida de rastreamento com `Set` e `Promise.race`, acertando em cheio na Cláusula de Guarda (passando nos testes de fronteira matemática). No entanto, cometeu um erro crítico na propagação de falhas.
+
+[detalhamento completo](models/zai.glm4.7-flash/resultado.md)
+
+#### #2 qwen.qwen3-235B-A22B-2507
+
+> em 26/04/2026
+
+❌ Reprovado (Deadlock por Semáforo em Casos de Fronteira)
+
+Este modelo peso-pesado aplicou um padrão clássico de Ciência da Computação — o Semáforo (Semaphore) — para controlar a concorrência. Embora a lógica funcione perfeitamente para limites válidos, falhou em casos de fronteira.
+
+[detalhamento completo](models/qwen.qwen3-235B-A22B-2507/resultado.md)
+
+#### #3 qwen.qwen3-coder
+
+> em 26/04/2026
+
+❌ Reprovado por Corrupção de Estado e Retorno Prematuro.
+
+Este modelo tentou implementar um gerenciador de concorrência baseado em um array de "tarefas ativas" e `Promise.race`. No entanto, ele cometeu um erro lógico grosseiro ao remover as tarefas concluídas.
+
+[detalhamento completo](models/qwen.qwen3-coder/resultado.md)
+
+#### #4 unsloth.qwen3-coder-30b-a3b-instruct
+
+> em 25/04/2026
+
+❌ Reprovado (Múltiplas Falhas Críticas)
+
+Este modelo produziu o que chamamos de "código Frankenstein". Embora tente utilizar métodos modernos de manipulação de array do JavaScript (`slice`, `flat`), ele falha nos fundamentos da concorrência e do contrato de tipos.
+
+[detalhamento completo](models/unsloth.qwen3-coder-30b-a3b-instruct/resultado.md)
