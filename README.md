@@ -233,8 +233,8 @@ Ao receber a resposta das outras inteligências, observe os seguintes pontos de 
 
 * **Falha 24: Ausência de Imutabilidade na Assinatura (`readonly T[]`)**
   * *O erro*: A IA declara o parâmetro de entrada como `items: T[]` em vez de `items: readonly T[]`, mesmo quando a função apenas consome os dados e não precisa mutá-los.
-  * *Por que é ruim*: Em TypeScript, `readonly T[]` comunica na própria API a intenção de não mutação, aumenta a segurança sem custo de *runtime*, impede efeitos colaterais acidentais e torna o contrato da função mais sênior e mais preciso.
-  * *Como avaliar*: Se a função usa `readonly T[]`, isso é um ponto positivo de design. Se usa apenas `T[]`, mas não muta o array, marque como **ressalva/dívida técnica**. Se além disso muta o array, a implementação também incorre na **Falha 16**.
+  * *Por que é ruim*: Em TypeScript, `readonly T[]` transforma a intenção arquitetural em contrato explícito de API. Isso eleva a segurança estática, reduz a superfície para efeitos colaterais acidentais e demonstra maturidade no desenho da assinatura. A ausência de `readonly` não quebra o *runtime*, mas revela uma oportunidade perdida de tornar a função mais precisa, mais segura e mais sênior.
+  * *Como avaliar*: Se a função usa `readonly T[]`, marque como ponto positivo de design. Se usa apenas `T[]`, mas não muta a entrada, trate como **dívida técnica de assinatura**. Se além disso muta o array recebido, a implementação também incorre na **Falha 16**.
 
 ## Resultado da execução do teste
 
